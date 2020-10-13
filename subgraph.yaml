@@ -1,38 +1,34 @@
-specVersion: 0.0.1
+specVersion: 0.0.2
 schema:
-  file: ./schema.graphql
+    file: ./schema.graphql
 dataSources:
-  - kind: ethereum/contract
-    name: Contract
-    network: xdai
-    source:
-      address: "0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"
-      abi: Contract
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.2
-      language: wasm/assemblyscript
-      entities:
-        - ArrivalQueued
-        - BoughtHat
-        - PlanetDelegated
-        - PlanetUndelegated
-        - PlanetUpgraded
-        - PlayerInitialized
-      abis:
-        - name: Contract
-          file: ./abis/Contract.json
-      eventHandlers:
-        - event: ArrivalQueued(uint256)
-          handler: handleArrivalQueued
-        - event: BoughtHat(uint256)
-          handler: handleBoughtHat
-        - event: PlanetDelegated(uint256,address)
-          handler: handlePlanetDelegated
-        - event: PlanetUndelegated(uint256,address)
-          handler: handlePlanetUndelegated
-        - event: PlanetUpgraded(uint256)
-          handler: handlePlanetUpgraded
-        - event: PlayerInitialized(address,uint256)
-          handler: handlePlayerInitialized
-      file: ./src/mapping.ts
+    - kind: ethereum/contract
+      name: Contract
+      network: xdai
+      source:
+          address: "0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"
+          abi: Contract
+          startBlock: 12314144
+      mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.4
+          language: wasm/assemblyscript
+          entities:
+              - ArrivalQueued
+              - BoughtHat
+              - PlanetDelegated
+              - PlanetUndelegated
+              - PlanetUpgraded
+              - PlayerInitialized
+          abis:
+              - name: Contract
+                file: ./abis/Contract.json
+          eventHandlers:
+              # - event: PlanetUpgraded(uint256)
+              #   handler: handlePlanetUpgraded
+              - event: PlayerInitialized(address,uint256)
+                handler: handlePlayerInitialized
+          callHandlers:
+              - function: refreshPlanet(uint256)
+                handler: handleRefreshPlanet
+          file: ./src/mapping.ts

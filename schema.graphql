@@ -1,5 +1,41 @@
-type ExampleEntity @entity {
-  id: ID!
-  count: BigInt!
-  arrivalId: BigInt! # uint256
+type Player @entity {
+    id: ID!
+    initTimestamp: BigInt!
+    homeWorld: BigInt!
+}
+
+type Planet @entity {
+    id: ID! # location hash of the planet
+    isInitialized: Boolean!
+    createdAt: BigInt!
+    lastUpdated: BigInt!
+    owner: String!
+    perlin: BigInt!
+    range: BigInt!
+    speed: BigInt!
+    defense: BigInt!
+    population: BigInt!
+    populationCap: BigInt!
+    populationGrowth: BigInt!
+    silverCap: BigInt!
+    silverGrowth: BigInt!
+    silver: BigInt!
+    planetLevel: BigInt!
+    upgradeState0: BigInt!
+    upgradeState1: BigInt!
+    upgradeState2: BigInt!
+    hatLevel: BigInt!
+    planetResource: PlanetResource!
+    spaceType: SpaceType!
+}
+
+enum PlanetResource {
+    NONE
+    SILVER
+}
+
+enum SpaceType {
+    NEBULA
+    SPACE
+    DEEP_SPACE
 }
