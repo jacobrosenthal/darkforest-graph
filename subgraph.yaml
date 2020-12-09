@@ -24,11 +24,12 @@ dataSources:
               - name: Contract
                 file: ./abis/Contract.json
           eventHandlers:
-              # - event: PlanetUpgraded(uint256)
-              #   handler: handlePlanetUpgraded
+              - event: PlanetUpgraded(uint256)
+                handler: handlePlanetUpgraded
+              - event: BoughtHat(uint256)
+                handler: handleBoughtHat
+              - event: ArrivalQueued(uint256)
+                handler: handleArrivalQueued
               - event: PlayerInitialized(address,uint256)
                 handler: handlePlayerInitialized
-          callHandlers:
-              - function: refreshPlanet(uint256)
-                handler: handleRefreshPlanet
           file: ./src/mapping.ts

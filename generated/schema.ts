@@ -51,13 +51,22 @@ export class Player extends Entity {
     this.set("initTimestamp", Value.fromBigInt(value));
   }
 
-  get homeWorld(): BigInt {
+  get homeWorld(): string {
     let value = this.get("homeWorld");
+    return value.toString();
+  }
+
+  set homeWorld(value: string) {
+    this.set("homeWorld", Value.fromString(value));
+  }
+
+  get volume(): BigInt {
+    let value = this.get("volume");
     return value.toBigInt();
   }
 
-  set homeWorld(value: BigInt) {
-    this.set("homeWorld", Value.fromBigInt(value));
+  set volume(value: BigInt) {
+    this.set("volume", Value.fromBigInt(value));
   }
 }
 
