@@ -244,6 +244,72 @@
                 "type": "uint256"
             }
         ],
+        "name": "bulkGetPlanetArrivals",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "player",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "fromPlanet",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "toPlanet",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "popArriving",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "silverMoved",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "departureTime",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "arrivalTime",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct DarkForestTypes.ArrivalData[][]",
+                "name": "",
+                "type": "tuple[][]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "startIdx",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endIdx",
+                "type": "uint256"
+            }
+        ],
         "name": "bulkGetPlanetIds",
         "outputs": [
             {
@@ -730,6 +796,46 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "getUpgrades",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "popCapMultiplier",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "popGroMultiplier",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "rangeMultiplier",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "speedMultiplier",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "defMultiplier",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct DarkForestTypes.Upgrade[4][3]",
+                "name": "",
+                "type": "tuple[4][3]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "address",
@@ -749,6 +855,40 @@
         ],
         "name": "initialize",
         "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[2]",
+                "name": "_a",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[2][2]",
+                "name": "_b",
+                "type": "uint256[2][2]"
+            },
+            {
+                "internalType": "uint256[2]",
+                "name": "_c",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[3]",
+                "name": "_input",
+                "type": "uint256[3]"
+            }
+        ],
+        "name": "initializePlayer",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
         "stateMutability": "nonpayable",
         "type": "function"
     },
@@ -812,6 +952,40 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[2]",
+                "name": "_a",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[2][2]",
+                "name": "_b",
+                "type": "uint256[2][2]"
+            },
+            {
+                "internalType": "uint256[2]",
+                "name": "_c",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[7]",
+                "name": "_input",
+                "type": "uint256[7]"
+            }
+        ],
+        "name": "move",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
