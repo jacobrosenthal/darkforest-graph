@@ -730,46 +730,6 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "getUpgrades",
-        "outputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "popCapMultiplier",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "popGroMultiplier",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "rangeMultiplier",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "speedMultiplier",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "defMultiplier",
-                        "type": "uint256"
-                    }
-                ],
-                "internalType": "struct DarkForestTypes.Upgrade[4][3]",
-                "name": "",
-                "type": "tuple[4][3]"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "address",
