@@ -2,14 +2,15 @@ type Player @entity {
     id: ID!
     initTimestamp: BigInt!
     homeWorld: Planet!
+    planets: [Planet!]! @derivedFrom(field: "owner")
 }
 
 type Planet @entity {
     id: ID! # location hash of the planet
+    owner: Player!
     isInitialized: Boolean!
     createdAt: BigInt!
     lastUpdated: BigInt!
-    owner: String!
     perlin: BigInt!
     range: BigInt!
     speed: BigInt!

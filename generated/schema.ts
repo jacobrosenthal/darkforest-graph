@@ -59,6 +59,15 @@ export class Player extends Entity {
   set homeWorld(value: string) {
     this.set("homeWorld", Value.fromString(value));
   }
+
+  get planets(): Array<string> {
+    let value = this.get("planets");
+    return value.toStringArray();
+  }
+
+  set planets(value: Array<string>) {
+    this.set("planets", Value.fromStringArray(value));
+  }
 }
 
 export class Planet extends Entity {
@@ -91,6 +100,15 @@ export class Planet extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get owner(): string {
+    let value = this.get("owner");
+    return value.toString();
+  }
+
+  set owner(value: string) {
+    this.set("owner", Value.fromString(value));
+  }
+
   get isInitialized(): boolean {
     let value = this.get("isInitialized");
     return value.toBoolean();
@@ -116,15 +134,6 @@ export class Planet extends Entity {
 
   set lastUpdated(value: BigInt) {
     this.set("lastUpdated", Value.fromBigInt(value));
-  }
-
-  get owner(): string {
-    let value = this.get("owner");
-    return value.toString();
-  }
-
-  set owner(value: string) {
-    this.set("owner", Value.fromString(value));
   }
 
   get perlin(): BigInt {

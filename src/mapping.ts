@@ -28,46 +28,38 @@ function toPlanetResource(planetResource: string): string {
 
 export function handlePlayerInitialized(event: PlayerInitialized): void {
     let contract = Contract.bind(event.address);
-    let playerEntity = Player.load(event.params.player.toHexString());
-    let planetEntity = Planet.load(event.params.loc.toString());
+    let locationid = event.params.loc;
 
-    if (planetEntity == null) {
-        planetEntity = new Planet(event.params.loc.toString());
-    }
+    let player = new Player(event.params.player.toHexString());
+    player.initTimestamp = event.block.timestamp;
+    player.homeWorld = locationid.toString();
+    player.save();
 
-    if (playerEntity == null) {
-        playerEntity = new Player(event.params.player.toHexString());
-        playerEntity.initTimestamp = event.block.timestamp;
-        playerEntity.homeWorld = planetEntity.id;
-    }
-
-    let planet = contract.planets(event.params.loc);
-    let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
-
-    planetEntity.isInitialized = planetExtendedInfo.value0;
-    planetEntity.createdAt = planetExtendedInfo.value1;
-    planetEntity.lastUpdated = planetExtendedInfo.value2;
-    planetEntity.owner = planet.value0.toHexString();
-    planetEntity.perlin = planetExtendedInfo.value3;
-    planetEntity.range = planet.value1;
-    planetEntity.speed = planet.value2;
-    planetEntity.defense = planet.value3;
-    planetEntity.population = planet.value4;
-    planetEntity.populationCap = planet.value5;
-    planetEntity.populationGrowth = planet.value6;
-    planetEntity.silverCap = planet.value8;
-    planetEntity.silverGrowth = planet.value9;
-    planetEntity.silver = planet.value10;
-    planetEntity.planetLevel = planet.value11;
-    planetEntity.upgradeState0 = planetExtendedInfo.value5;
-    planetEntity.upgradeState1 = planetExtendedInfo.value6;
-    planetEntity.upgradeState2 = planetExtendedInfo.value7;
-    planetEntity.hatLevel = planetExtendedInfo.value8;
-    planetEntity.planetResource = toPlanetResource(planet.value7.toString());
-    planetEntity.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
-
-    playerEntity.save();
-    planetEntity.save();
+    let rawPlanet = contract.planets(locationid);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationid);
+    let planet = new Planet(locationid.toString());
+    planet.isInitialized = planetExtendedInfo.value0;
+    planet.createdAt = planetExtendedInfo.value1;
+    planet.lastUpdated = planetExtendedInfo.value2;
+    planet.owner = player.id;
+    planet.perlin = planetExtendedInfo.value3;
+    planet.range = rawPlanet.value1;
+    planet.speed = rawPlanet.value2;
+    planet.defense = rawPlanet.value3;
+    planet.population = rawPlanet.value4;
+    planet.populationCap = rawPlanet.value5;
+    planet.populationGrowth = rawPlanet.value6;
+    planet.silverCap = rawPlanet.value8;
+    planet.silverGrowth = rawPlanet.value9;
+    planet.silver = rawPlanet.value10;
+    planet.planetLevel = rawPlanet.value11;
+    planet.upgradeState0 = planetExtendedInfo.value5;
+    planet.upgradeState1 = planetExtendedInfo.value6;
+    planet.upgradeState2 = planetExtendedInfo.value7;
+    planet.hatLevel = planetExtendedInfo.value8;
+    planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
+    planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+    planet.save();
 }
 
 export function handleBoughtHat(event: BoughtHat): void {
