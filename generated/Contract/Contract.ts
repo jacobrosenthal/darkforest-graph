@@ -836,7 +836,7 @@ export class Contract extends ethereum.SmartContract {
   ): Array<Contract__bulkGetPlanetsResultRetStruct> {
     let result = super.call(
       "bulkGetPlanets",
-      "bulkGetPlanets(uint256,uint256):(tuple[])",
+      "bulkGetPlanets(uint256,uint256):((address,uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256)[])",
       [
         ethereum.Value.fromUnsignedBigInt(startIdx),
         ethereum.Value.fromUnsignedBigInt(endIdx)
@@ -852,7 +852,7 @@ export class Contract extends ethereum.SmartContract {
   ): ethereum.CallResult<Array<Contract__bulkGetPlanetsResultRetStruct>> {
     let result = super.tryCall(
       "bulkGetPlanets",
-      "bulkGetPlanets(uint256,uint256):(tuple[])",
+      "bulkGetPlanets(uint256,uint256):((address,uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256)[])",
       [
         ethereum.Value.fromUnsignedBigInt(startIdx),
         ethereum.Value.fromUnsignedBigInt(endIdx)
@@ -873,7 +873,7 @@ export class Contract extends ethereum.SmartContract {
   ): Array<Contract__bulkGetPlanetsExtendedInfoResultRetStruct> {
     let result = super.call(
       "bulkGetPlanetsExtendedInfo",
-      "bulkGetPlanetsExtendedInfo(uint256,uint256):(tuple[])",
+      "bulkGetPlanetsExtendedInfo(uint256,uint256):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,address[])[])",
       [
         ethereum.Value.fromUnsignedBigInt(startIdx),
         ethereum.Value.fromUnsignedBigInt(endIdx)
@@ -893,7 +893,7 @@ export class Contract extends ethereum.SmartContract {
   > {
     let result = super.tryCall(
       "bulkGetPlanetsExtendedInfo",
-      "bulkGetPlanetsExtendedInfo(uint256,uint256):(tuple[])",
+      "bulkGetPlanetsExtendedInfo(uint256,uint256):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,address[])[])",
       [
         ethereum.Value.fromUnsignedBigInt(startIdx),
         ethereum.Value.fromUnsignedBigInt(endIdx)
@@ -968,7 +968,7 @@ export class Contract extends ethereum.SmartContract {
   getDefaultStats(): Array<Contract__getDefaultStatsResultValue0Struct> {
     let result = super.call(
       "getDefaultStats",
-      "getDefaultStats():(tuple[])",
+      "getDefaultStats():((string,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)[])",
       []
     );
 
@@ -982,7 +982,7 @@ export class Contract extends ethereum.SmartContract {
   > {
     let result = super.tryCall(
       "getDefaultStats",
-      "getDefaultStats():(tuple[])",
+      "getDefaultStats():((string,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)[])",
       []
     );
     if (result.reverted) {
@@ -1029,7 +1029,7 @@ export class Contract extends ethereum.SmartContract {
   ): Array<Contract__getPlanetArrivalsResultRetStruct> {
     let result = super.call(
       "getPlanetArrivals",
-      "getPlanetArrivals(uint256):(tuple[])",
+      "getPlanetArrivals(uint256):((uint256,address,uint256,uint256,uint256,uint256,uint256,uint256)[])",
       [ethereum.Value.fromUnsignedBigInt(_location)]
     );
 
@@ -1041,7 +1041,7 @@ export class Contract extends ethereum.SmartContract {
   ): ethereum.CallResult<Array<Contract__getPlanetArrivalsResultRetStruct>> {
     let result = super.tryCall(
       "getPlanetArrivals",
-      "getPlanetArrivals(uint256):(tuple[])",
+      "getPlanetArrivals(uint256):((uint256,address,uint256,uint256,uint256,uint256,uint256,uint256)[])",
       [ethereum.Value.fromUnsignedBigInt(_location)]
     );
     if (result.reverted) {
