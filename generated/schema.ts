@@ -91,6 +91,15 @@ export class Planet extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get owner(): string {
+    let value = this.get("owner");
+    return value.toString();
+  }
+
+  set owner(value: string) {
+    this.set("owner", Value.fromString(value));
+  }
+
   get isInitialized(): boolean {
     let value = this.get("isInitialized");
     return value.toBoolean();
@@ -116,15 +125,6 @@ export class Planet extends Entity {
 
   set lastUpdated(value: BigInt) {
     this.set("lastUpdated", Value.fromBigInt(value));
-  }
-
-  get owner(): string {
-    let value = this.get("owner");
-    return value.toString();
-  }
-
-  set owner(value: string) {
-    this.set("owner", Value.fromString(value));
   }
 
   get perlin(): BigInt {
@@ -278,99 +278,5 @@ export class Planet extends Entity {
 
   set spaceType(value: string) {
     this.set("spaceType", Value.fromString(value));
-  }
-}
-
-export class Arrival extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save Arrival entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save Arrival entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("Arrival", id.toString(), this);
-  }
-
-  static load(id: string): Arrival | null {
-    return store.get("Arrival", id) as Arrival | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get player(): string {
-    let value = this.get("player");
-    return value.toString();
-  }
-
-  set player(value: string) {
-    this.set("player", Value.fromString(value));
-  }
-
-  get fromPlanet(): BigInt {
-    let value = this.get("fromPlanet");
-    return value.toBigInt();
-  }
-
-  set fromPlanet(value: BigInt) {
-    this.set("fromPlanet", Value.fromBigInt(value));
-  }
-
-  get toPlanet(): BigInt {
-    let value = this.get("toPlanet");
-    return value.toBigInt();
-  }
-
-  set toPlanet(value: BigInt) {
-    this.set("toPlanet", Value.fromBigInt(value));
-  }
-
-  get popArriving(): BigInt {
-    let value = this.get("popArriving");
-    return value.toBigInt();
-  }
-
-  set popArriving(value: BigInt) {
-    this.set("popArriving", Value.fromBigInt(value));
-  }
-
-  get silverMoved(): BigInt {
-    let value = this.get("silverMoved");
-    return value.toBigInt();
-  }
-
-  set silverMoved(value: BigInt) {
-    this.set("silverMoved", Value.fromBigInt(value));
-  }
-
-  get departureTime(): BigInt {
-    let value = this.get("departureTime");
-    return value.toBigInt();
-  }
-
-  set departureTime(value: BigInt) {
-    this.set("departureTime", Value.fromBigInt(value));
-  }
-
-  get arrivalTime(): BigInt {
-    let value = this.get("arrivalTime");
-    return value.toBigInt();
-  }
-
-  set arrivalTime(value: BigInt) {
-    this.set("arrivalTime", Value.fromBigInt(value));
   }
 }

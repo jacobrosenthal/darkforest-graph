@@ -6,10 +6,10 @@ type Player @entity {
 
 type Planet @entity {
     id: ID! # location hash of the planet
+    owner: String!
     isInitialized: Boolean!
     createdAt: BigInt!
     lastUpdated: BigInt!
-    owner: String!
     perlin: BigInt!
     range: BigInt!
     speed: BigInt!
