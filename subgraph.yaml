@@ -14,7 +14,6 @@ dataSources:
           apiVersion: 0.0.4
           language: wasm/assemblyscript
           entities:
-              - ArrivalQueued
               - BoughtHat
               - PlanetDelegated
               - PlanetUndelegated
@@ -28,8 +27,6 @@ dataSources:
                 handler: handlePlanetUpgraded
               - event: BoughtHat(uint256)
                 handler: handleBoughtHat
-              - event: ArrivalQueued(uint256)
-                handler: handleArrivalQueued
               - event: PlayerInitialized(address,uint256)
                 handler: handlePlayerInitialized
           file: ./src/mapping.ts

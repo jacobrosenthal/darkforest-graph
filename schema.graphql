@@ -2,7 +2,6 @@ type Player @entity {
     id: ID!
     initTimestamp: BigInt!
     homeWorld: Planet!
-    volume: BigInt!
 }
 
 type Planet @entity {
