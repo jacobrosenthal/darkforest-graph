@@ -59,15 +59,6 @@ export class Player extends Entity {
   set homeWorld(value: string) {
     this.set("homeWorld", Value.fromString(value));
   }
-
-  get volume(): BigInt {
-    let value = this.get("volume");
-    return value.toBigInt();
-  }
-
-  set volume(value: BigInt) {
-    this.set("volume", Value.fromBigInt(value));
-  }
 }
 
 export class Planet extends Entity {
