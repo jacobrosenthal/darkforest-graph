@@ -57,6 +57,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     planet.upgradeState1 = planetExtendedInfo.value6;
     planet.upgradeState2 = planetExtendedInfo.value7;
     planet.hatLevel = planetExtendedInfo.value8;
+    planet.silverSpentComputed = 0;
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
     planet.save();
@@ -99,6 +100,29 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
         planet.upgradeState0 = planetExtendedInfo.value5;
         planet.upgradeState1 = planetExtendedInfo.value6;
         planet.upgradeState2 = planetExtendedInfo.value7;
+        planet.silverSpentComputed = calculateSilverSpent(planet);
         planet.save();
     }
+}
+
+//how to remove null
+function calculateSilverSpent(planet: Planet | null): i32 {
+    let upgradeState: i32[] = [
+        planet.upgradeState0.toI32(),
+        planet.upgradeState1.toI32(),
+        planet.upgradeState2.toI32(),
+    ];
+
+    //todo hardcoded?
+    let upgradeCosts: i32[] = [20, 40, 60, 80, 100];
+    let totalUpgrades = 0;
+    for (let i = 0; i < upgradeState.length; i++) {
+        totalUpgrades += upgradeState[i];
+    }
+    let totalUpgradeCostPercent = 0;
+    for (let i = 0; i < totalUpgrades; i++) {
+        totalUpgradeCostPercent += upgradeCosts[i];
+    }
+
+    return (totalUpgradeCostPercent / 100) * planet.silverCap.toI32();
 }

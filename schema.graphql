@@ -28,6 +28,7 @@ type Planet @entity {
     hatLevel: BigInt!
     planetResource: PlanetResource!
     spaceType: SpaceType!
+    silverSpentComputed: Int!
 }
 
 type Arrival @entity {

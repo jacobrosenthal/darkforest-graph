@@ -288,6 +288,15 @@ export class Planet extends Entity {
   set spaceType(value: string) {
     this.set("spaceType", Value.fromString(value));
   }
+
+  get silverSpentComputed(): i32 {
+    let value = this.get("silverSpentComputed");
+    return value.toI32();
+  }
+
+  set silverSpentComputed(value: i32) {
+    this.set("silverSpentComputed", Value.fromI32(value));
+  }
 }
 
 export class Arrival extends Entity {
