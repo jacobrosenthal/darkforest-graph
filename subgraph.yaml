@@ -14,19 +14,11 @@ dataSources:
           apiVersion: 0.0.4
           language: wasm/assemblyscript
           entities:
-              - BoughtHat
-              - PlanetDelegated
-              - PlanetUndelegated
-              - PlanetUpgraded
               - PlayerInitialized
           abis:
               - name: Contract
                 file: ./abis/Contract.json
           eventHandlers:
-              - event: PlanetUpgraded(uint256)
-                handler: handlePlanetUpgraded
-              - event: BoughtHat(uint256)
-                handler: handleBoughtHat
               - event: PlayerInitialized(address,uint256)
                 handler: handlePlayerInitialized
           file: ./src/mapping.ts

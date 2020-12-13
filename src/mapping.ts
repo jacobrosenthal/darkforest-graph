@@ -1,9 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import {
     Contract,
-    PlanetUpgraded,
     PlayerInitialized,
-    BoughtHat,
 } from "../generated/Contract/Contract";
 import { Player, Planet } from "../generated/schema";
 
@@ -66,77 +64,5 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     planetEntity.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
 
     playerEntity.save();
-    planetEntity.save();
-}
-
-export function handleBoughtHat(event: BoughtHat): void {
-    let contract = Contract.bind(event.address);
-    let planetEntity = Planet.load(event.params.loc.toString());
-
-    if (planetEntity == null) {
-        planetEntity = new Planet(event.params.loc.toString());
-    }
-
-    let planet = contract.planets(event.params.loc);
-    let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
-
-    planetEntity.isInitialized = planetExtendedInfo.value0;
-    planetEntity.createdAt = planetExtendedInfo.value1;
-    planetEntity.lastUpdated = planetExtendedInfo.value2;
-    planetEntity.owner = planet.value0.toHexString();
-    planetEntity.perlin = planetExtendedInfo.value3;
-    planetEntity.range = planet.value1;
-    planetEntity.speed = planet.value2;
-    planetEntity.defense = planet.value3;
-    planetEntity.population = planet.value4;
-    planetEntity.populationCap = planet.value5;
-    planetEntity.populationGrowth = planet.value6;
-    planetEntity.silverCap = planet.value8;
-    planetEntity.silverGrowth = planet.value9;
-    planetEntity.silver = planet.value10;
-    planetEntity.planetLevel = planet.value11;
-    planetEntity.upgradeState0 = planetExtendedInfo.value5;
-    planetEntity.upgradeState1 = planetExtendedInfo.value6;
-    planetEntity.upgradeState2 = planetExtendedInfo.value7;
-    planetEntity.hatLevel = planetExtendedInfo.value8;
-    planetEntity.planetResource = toPlanetResource(planet.value7.toString());
-    planetEntity.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
-
-    planetEntity.save();
-}
-
-export function handlePlanetUpgraded(event: PlanetUpgraded): void {
-    let contract = Contract.bind(event.address);
-    let planetEntity = Planet.load(event.params.loc.toString());
-
-    if (planetEntity == null) {
-        planetEntity = new Planet(event.params.loc.toString());
-    }
-
-    let planet = contract.planets(event.params.loc);
-    let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
-
-    planetEntity.isInitialized = planetExtendedInfo.value0;
-    planetEntity.createdAt = planetExtendedInfo.value1;
-    planetEntity.lastUpdated = planetExtendedInfo.value2;
-    planetEntity.owner = planet.value0.toHexString();
-    planetEntity.perlin = planetExtendedInfo.value3;
-    planetEntity.range = planet.value1;
-    planetEntity.speed = planet.value2;
-    planetEntity.defense = planet.value3;
-    planetEntity.population = planet.value4;
-    planetEntity.populationCap = planet.value5;
-    planetEntity.populationGrowth = planet.value6;
-    planetEntity.silverCap = planet.value8;
-    planetEntity.silverGrowth = planet.value9;
-    planetEntity.silver = planet.value10;
-    planetEntity.planetLevel = planet.value11;
-    planetEntity.upgradeState0 = planetExtendedInfo.value5;
-    planetEntity.upgradeState1 = planetExtendedInfo.value6;
-    planetEntity.upgradeState2 = planetExtendedInfo.value7;
-    planetEntity.hatLevel = planetExtendedInfo.value8;
-    planetEntity.planetResource = toPlanetResource(planet.value7.toString());
-    planetEntity.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
-
     planetEntity.save();
 }
