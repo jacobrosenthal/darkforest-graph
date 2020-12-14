@@ -35,33 +35,10 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     player.homeWorld = locationid.toString();
     player.save();
 
-    let rawPlanet = contract.planets(locationid);
-    let planetExtendedInfo = contract.planetsExtendedInfo(locationid);
-    let planet = new Planet(locationid.toString());
-    planet.isInitialized = planetExtendedInfo.value0;
-    planet.createdAt = planetExtendedInfo.value1;
-    planet.lastUpdated = planetExtendedInfo.value2;
-    planet.owner = player.id;
-    planet.perlin = planetExtendedInfo.value3;
-    planet.range = rawPlanet.value1;
-    planet.speed = rawPlanet.value2;
-    planet.defense = rawPlanet.value3;
-    planet.population = rawPlanet.value4;// / 1000;
-    planet.populationCap = rawPlanet.value5;// / 1000;
-    planet.populationGrowth = rawPlanet.value6;// / 1000;
-    planet.silverCap = rawPlanet.value8;// / 1000;
-    planet.silverGrowth = rawPlanet.value9;// / 1000;
-    planet.silver = rawPlanet.value10;// / 1000;
-    planet.planetLevel = rawPlanet.value11;
-    planet.upgradeState0 = planetExtendedInfo.value5;
-    planet.upgradeState1 = planetExtendedInfo.value6;
-    planet.upgradeState2 = planetExtendedInfo.value7;
-    planet.hatLevel = planetExtendedInfo.value8;
-    planet.silverSpentComputed = 0;
-    planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
-    planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+    let planet = newPlanet(contract, locationid, player.id);
     planet.save();
 }
+
 
 
 export function handleBlock(block: ethereum.Block): void {
@@ -69,24 +46,7 @@ export function handleBlock(block: ethereum.Block): void {
     let contract = Contract.bind(Address.fromString("0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"));
 
     // dummy arrival sadly all just to hold the last timestap we processed _lastProcessed
-    let dummy = Arrival.load(BigInt.fromI32(i32.MAX_VALUE).toString());
-    if (dummy === null) {
-        dummy = new Arrival(BigInt.fromI32(i32.MAX_VALUE).toString());
-        dummy.arrivalId = BigInt.fromI32(i32.MAX_VALUE);
-        dummy.player = BigInt.fromI32(0).toHexString();
-        dummy.fromPlanet = BigInt.fromI32(0);
-        dummy.toPlanet = BigInt.fromI32(0);
-        dummy.popArriving = BigInt.fromI32(0);
-        dummy.silverMoved = BigInt.fromI32(0);
-        dummy.departureTime = BigInt.fromI32(0);
-        dummy.arrivalTime = BigInt.fromI32(0);
-        dummy.receivedAt = block.timestamp;
-        dummy.processed = false;
-        dummy._lastProcessed = block.timestamp;
-    }
-
-
-
+    let dummy = dummyArrival(block.timestamp);
 
     // look up last time and 1s incremets that dont exceed current time
     for (let i = dummy._lastProcessed; i < block.timestamp; i = i + BigInt.fromI32(1)) {
@@ -102,31 +62,7 @@ export function handleBlock(block: ethereum.Block): void {
                 let a = arrivals[i];
                 let planet = Planet.load(a.toPlanet.toString());
                 if (planet === null) {
-                    let rawPlanet = contract.planets(a.toPlanet);
-                    let planetExtendedInfo = contract.planetsExtendedInfo(a.toPlanet);
-                    planet = new Planet(a.toPlanet.toString());
-                    planet.owner = "0000000000000000000000000000000000000000";
-                    planet.isInitialized = planetExtendedInfo.value0;
-                    planet.createdAt = planetExtendedInfo.value1;
-                    planet.lastUpdated = planetExtendedInfo.value2;
-                    planet.perlin = planetExtendedInfo.value3;
-                    planet.range = rawPlanet.value1;
-                    planet.speed = rawPlanet.value2;
-                    planet.defense = rawPlanet.value3;
-                    planet.population = rawPlanet.value4;// / 1000;
-                    planet.populationCap = rawPlanet.value5;// / 1000;
-                    planet.populationGrowth = rawPlanet.value6;// / 1000;
-                    planet.silverCap = rawPlanet.value8;// / 1000;
-                    planet.silverGrowth = rawPlanet.value9;// / 1000;
-                    planet.silver = rawPlanet.value10;// / 1000;
-                    planet.planetLevel = rawPlanet.value11;
-                    planet.upgradeState0 = planetExtendedInfo.value5;
-                    planet.upgradeState1 = planetExtendedInfo.value6;
-                    planet.upgradeState2 = planetExtendedInfo.value7;
-                    planet.hatLevel = planetExtendedInfo.value8;
-                    planet.silverSpentComputed = 0;
-                    planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
-                    planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+                    planet = newPlanet(contract, a.toPlanet, "0000000000000000000000000000000000000000");
                 }
 
                 planet = arrive(planet, a);
@@ -324,4 +260,56 @@ function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null
     }
 
     return toPlanet;
+}
+
+
+
+function newPlanet(contract: Contract | null, locationid: BigInt, ownerid: String): Planet | null {
+
+    let rawPlanet = contract.planets(locationid);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationid);
+    let planet = new Planet(locationid.toString());
+    planet.owner = ownerid;
+    planet.isInitialized = planetExtendedInfo.value0;
+    planet.createdAt = planetExtendedInfo.value1;
+    planet.lastUpdated = planetExtendedInfo.value2;
+    planet.perlin = planetExtendedInfo.value3;
+    planet.range = rawPlanet.value1;
+    planet.speed = rawPlanet.value2;
+    planet.defense = rawPlanet.value3;
+    planet.population = rawPlanet.value4;// / 1000;
+    planet.populationCap = rawPlanet.value5;// / 1000;
+    planet.populationGrowth = rawPlanet.value6;// / 1000;
+    planet.silverCap = rawPlanet.value8;// / 1000;
+    planet.silverGrowth = rawPlanet.value9;// / 1000;
+    planet.silver = rawPlanet.value10;// / 1000;
+    planet.planetLevel = rawPlanet.value11;
+    planet.upgradeState0 = planetExtendedInfo.value5;
+    planet.upgradeState1 = planetExtendedInfo.value6;
+    planet.upgradeState2 = planetExtendedInfo.value7;
+    planet.hatLevel = planetExtendedInfo.value8;
+    planet.silverSpentComputed = 0;
+    planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
+    planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+    return planet;
+}
+
+function dummyArrival(timestamp: BigInt): Arrival | null {
+
+    let dummy = Arrival.load(BigInt.fromI32(i32.MAX_VALUE).toString());
+    if (dummy === null) {
+        dummy = new Arrival(BigInt.fromI32(i32.MAX_VALUE).toString());
+        dummy.arrivalId = BigInt.fromI32(i32.MAX_VALUE);
+        dummy.player = BigInt.fromI32(0).toHexString();
+        dummy.fromPlanet = BigInt.fromI32(0);
+        dummy.toPlanet = BigInt.fromI32(0);
+        dummy.popArriving = BigInt.fromI32(0);
+        dummy.silverMoved = BigInt.fromI32(0);
+        dummy.departureTime = BigInt.fromI32(0);
+        dummy.arrivalTime = BigInt.fromI32(0);
+        dummy.receivedAt = timestamp;
+        dummy.processed = false;
+        dummy._lastProcessed = timestamp;
+    }
+    return dummy;
 }
