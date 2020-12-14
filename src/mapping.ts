@@ -50,8 +50,8 @@ export function handleBlock(block: ethereum.Block): void {
     // dummy arrival sadly all just to hold the last timestap we processed lastProcessed
     let meta = loadMeta(current);
 
-    // look up last time and 1s incremets that dont exceed current time
-    for (let i = meta.lastProcessed; i < current; i = i + 1) {
+    // process last+1 up to and including current
+    for (let i = meta.lastProcessed + 1; i <= current; i++) {
         let bucket = ArrivalsAtInterval.load(i.toString());
         if (bucket !== null) {
 
