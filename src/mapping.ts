@@ -80,16 +80,13 @@ export function handleBlock(block: ethereum.Block): void {
     dummy.save();
 }
 
+
 export function handleBoughtHat(event: BoughtHat): void {
     let contract = Contract.bind(event.address);
-
+    let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
     let planet = Planet.load(event.params.loc.toString());
-    if (planet !== null) {
-        let rawPlanet = contract.planets(event.params.loc);
-        let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
-        planet.hatLevel = planetExtendedInfo.value8;
-        planet.save();
-    }
+    planet.hatLevel = planetExtendedInfo.value8;
+    planet.save();
 }
 
 export function handleArrivalQueued(event: ArrivalQueued): void {
@@ -131,14 +128,12 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
 
     let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
     let planet = Planet.load(event.params.loc.toString());
-    if (planet !== null) {
-        planet.lastUpdated = planetExtendedInfo.value2;
-        planet.upgradeState0 = planetExtendedInfo.value5;
-        planet.upgradeState1 = planetExtendedInfo.value6;
-        planet.upgradeState2 = planetExtendedInfo.value7;
-        planet.silverSpentComputed = calculateSilverSpent(planet);
-        planet.save();
-    }
+    planet.lastUpdated = planetExtendedInfo.value2;
+    planet.upgradeState0 = planetExtendedInfo.value5;
+    planet.upgradeState1 = planetExtendedInfo.value6;
+    planet.upgradeState2 = planetExtendedInfo.value7;
+    planet.silverSpentComputed = calculateSilverSpent(planet);
+    planet.save();
 }
 
 //how to remove null
