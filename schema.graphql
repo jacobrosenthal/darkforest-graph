@@ -1,6 +1,6 @@
 type Player @entity {
     id: ID!
-    initTimestamp: BigInt!
+    initTimestamp: Int!
     homeWorld: Planet!
     planets: [Planet!]! @derivedFrom(field: "owner")
 }
@@ -9,23 +9,23 @@ type Planet @entity {
     id: ID! # location hash of the planet
     owner: Player!
     isInitialized: Boolean!
-    createdAt: BigInt!
-    lastUpdated: BigInt!
-    perlin: BigInt!
-    range: BigInt!
-    speed: BigInt!
-    defense: BigInt!
-    population: BigInt!
-    populationCap: BigInt!
-    populationGrowth: BigInt!
-    silverCap: BigInt!
-    silverGrowth: BigInt!
-    silver: BigInt!
-    planetLevel: BigInt!
-    upgradeState0: BigInt!
-    upgradeState1: BigInt!
-    upgradeState2: BigInt!
-    hatLevel: BigInt!
+    createdAt: Int!
+    lastUpdated: Int!
+    perlin: Int!
+    range: Int!
+    speed: Int!
+    defense: Int!
+    population: Int!
+    populationCap: Int!
+    populationGrowth: Int!
+    silverCap: Int!
+    silverGrowth: Int!
+    silver: Int!
+    planetLevel: Int!
+    upgradeState0: Int!
+    upgradeState1: Int!
+    upgradeState2: Int!
+    hatLevel: Int!
     planetResource: PlanetResource!
     spaceType: SpaceType!
     silverSpentComputed: Int!
@@ -38,20 +38,20 @@ type ArrivalsAtInterval @entity  {
 
 type Meta @entity  {
     id: ID!
-    lastProcessed: BigInt!
+    lastProcessed: Int!
 }
 
 type Arrival @entity {
     id: ID!
-    arrivalId: BigInt!
+    arrivalId: Int!
     player: Player!
     fromPlanet: BigInt!
     toPlanet: BigInt!
-    popArriving: BigInt!
-    silverMoved: BigInt!
-    departureTime: BigInt!
-    arrivalTime: BigInt!
-    receivedAt: BigInt!
+    popArriving: Int!
+    silverMoved: Int!
+    departureTime: Int!
+    arrivalTime: Int!
+    receivedAt: Int!
     processedAt: Int
 }
 

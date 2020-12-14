@@ -42,13 +42,13 @@ export class Player extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get initTimestamp(): BigInt {
+  get initTimestamp(): i32 {
     let value = this.get("initTimestamp");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set initTimestamp(value: BigInt) {
-    this.set("initTimestamp", Value.fromBigInt(value));
+  set initTimestamp(value: i32) {
+    this.set("initTimestamp", Value.fromI32(value));
   }
 
   get homeWorld(): string {
@@ -118,157 +118,157 @@ export class Planet extends Entity {
     this.set("isInitialized", Value.fromBoolean(value));
   }
 
-  get createdAt(): BigInt {
+  get createdAt(): i32 {
     let value = this.get("createdAt");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set createdAt(value: BigInt) {
-    this.set("createdAt", Value.fromBigInt(value));
+  set createdAt(value: i32) {
+    this.set("createdAt", Value.fromI32(value));
   }
 
-  get lastUpdated(): BigInt {
+  get lastUpdated(): i32 {
     let value = this.get("lastUpdated");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set lastUpdated(value: BigInt) {
-    this.set("lastUpdated", Value.fromBigInt(value));
+  set lastUpdated(value: i32) {
+    this.set("lastUpdated", Value.fromI32(value));
   }
 
-  get perlin(): BigInt {
+  get perlin(): i32 {
     let value = this.get("perlin");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set perlin(value: BigInt) {
-    this.set("perlin", Value.fromBigInt(value));
+  set perlin(value: i32) {
+    this.set("perlin", Value.fromI32(value));
   }
 
-  get range(): BigInt {
+  get range(): i32 {
     let value = this.get("range");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set range(value: BigInt) {
-    this.set("range", Value.fromBigInt(value));
+  set range(value: i32) {
+    this.set("range", Value.fromI32(value));
   }
 
-  get speed(): BigInt {
+  get speed(): i32 {
     let value = this.get("speed");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set speed(value: BigInt) {
-    this.set("speed", Value.fromBigInt(value));
+  set speed(value: i32) {
+    this.set("speed", Value.fromI32(value));
   }
 
-  get defense(): BigInt {
+  get defense(): i32 {
     let value = this.get("defense");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set defense(value: BigInt) {
-    this.set("defense", Value.fromBigInt(value));
+  set defense(value: i32) {
+    this.set("defense", Value.fromI32(value));
   }
 
-  get population(): BigInt {
+  get population(): i32 {
     let value = this.get("population");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set population(value: BigInt) {
-    this.set("population", Value.fromBigInt(value));
+  set population(value: i32) {
+    this.set("population", Value.fromI32(value));
   }
 
-  get populationCap(): BigInt {
+  get populationCap(): i32 {
     let value = this.get("populationCap");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set populationCap(value: BigInt) {
-    this.set("populationCap", Value.fromBigInt(value));
+  set populationCap(value: i32) {
+    this.set("populationCap", Value.fromI32(value));
   }
 
-  get populationGrowth(): BigInt {
+  get populationGrowth(): i32 {
     let value = this.get("populationGrowth");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set populationGrowth(value: BigInt) {
-    this.set("populationGrowth", Value.fromBigInt(value));
+  set populationGrowth(value: i32) {
+    this.set("populationGrowth", Value.fromI32(value));
   }
 
-  get silverCap(): BigInt {
+  get silverCap(): i32 {
     let value = this.get("silverCap");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set silverCap(value: BigInt) {
-    this.set("silverCap", Value.fromBigInt(value));
+  set silverCap(value: i32) {
+    this.set("silverCap", Value.fromI32(value));
   }
 
-  get silverGrowth(): BigInt {
+  get silverGrowth(): i32 {
     let value = this.get("silverGrowth");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set silverGrowth(value: BigInt) {
-    this.set("silverGrowth", Value.fromBigInt(value));
+  set silverGrowth(value: i32) {
+    this.set("silverGrowth", Value.fromI32(value));
   }
 
-  get silver(): BigInt {
+  get silver(): i32 {
     let value = this.get("silver");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set silver(value: BigInt) {
-    this.set("silver", Value.fromBigInt(value));
+  set silver(value: i32) {
+    this.set("silver", Value.fromI32(value));
   }
 
-  get planetLevel(): BigInt {
+  get planetLevel(): i32 {
     let value = this.get("planetLevel");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set planetLevel(value: BigInt) {
-    this.set("planetLevel", Value.fromBigInt(value));
+  set planetLevel(value: i32) {
+    this.set("planetLevel", Value.fromI32(value));
   }
 
-  get upgradeState0(): BigInt {
+  get upgradeState0(): i32 {
     let value = this.get("upgradeState0");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set upgradeState0(value: BigInt) {
-    this.set("upgradeState0", Value.fromBigInt(value));
+  set upgradeState0(value: i32) {
+    this.set("upgradeState0", Value.fromI32(value));
   }
 
-  get upgradeState1(): BigInt {
+  get upgradeState1(): i32 {
     let value = this.get("upgradeState1");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set upgradeState1(value: BigInt) {
-    this.set("upgradeState1", Value.fromBigInt(value));
+  set upgradeState1(value: i32) {
+    this.set("upgradeState1", Value.fromI32(value));
   }
 
-  get upgradeState2(): BigInt {
+  get upgradeState2(): i32 {
     let value = this.get("upgradeState2");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set upgradeState2(value: BigInt) {
-    this.set("upgradeState2", Value.fromBigInt(value));
+  set upgradeState2(value: i32) {
+    this.set("upgradeState2", Value.fromI32(value));
   }
 
-  get hatLevel(): BigInt {
+  get hatLevel(): i32 {
     let value = this.get("hatLevel");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set hatLevel(value: BigInt) {
-    this.set("hatLevel", Value.fromBigInt(value));
+  set hatLevel(value: i32) {
+    this.set("hatLevel", Value.fromI32(value));
   }
 
   get planetResource(): string {
@@ -369,13 +369,13 @@ export class Meta extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get lastProcessed(): BigInt {
+  get lastProcessed(): i32 {
     let value = this.get("lastProcessed");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set lastProcessed(value: BigInt) {
-    this.set("lastProcessed", Value.fromBigInt(value));
+  set lastProcessed(value: i32) {
+    this.set("lastProcessed", Value.fromI32(value));
   }
 }
 
@@ -409,13 +409,13 @@ export class Arrival extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get arrivalId(): BigInt {
+  get arrivalId(): i32 {
     let value = this.get("arrivalId");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set arrivalId(value: BigInt) {
-    this.set("arrivalId", Value.fromBigInt(value));
+  set arrivalId(value: i32) {
+    this.set("arrivalId", Value.fromI32(value));
   }
 
   get player(): string {
@@ -445,49 +445,49 @@ export class Arrival extends Entity {
     this.set("toPlanet", Value.fromBigInt(value));
   }
 
-  get popArriving(): BigInt {
+  get popArriving(): i32 {
     let value = this.get("popArriving");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set popArriving(value: BigInt) {
-    this.set("popArriving", Value.fromBigInt(value));
+  set popArriving(value: i32) {
+    this.set("popArriving", Value.fromI32(value));
   }
 
-  get silverMoved(): BigInt {
+  get silverMoved(): i32 {
     let value = this.get("silverMoved");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set silverMoved(value: BigInt) {
-    this.set("silverMoved", Value.fromBigInt(value));
+  set silverMoved(value: i32) {
+    this.set("silverMoved", Value.fromI32(value));
   }
 
-  get departureTime(): BigInt {
+  get departureTime(): i32 {
     let value = this.get("departureTime");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set departureTime(value: BigInt) {
-    this.set("departureTime", Value.fromBigInt(value));
+  set departureTime(value: i32) {
+    this.set("departureTime", Value.fromI32(value));
   }
 
-  get arrivalTime(): BigInt {
+  get arrivalTime(): i32 {
     let value = this.get("arrivalTime");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set arrivalTime(value: BigInt) {
-    this.set("arrivalTime", Value.fromBigInt(value));
+  set arrivalTime(value: i32) {
+    this.set("arrivalTime", Value.fromI32(value));
   }
 
-  get receivedAt(): BigInt {
+  get receivedAt(): i32 {
     let value = this.get("receivedAt");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set receivedAt(value: BigInt) {
-    this.set("receivedAt", Value.fromBigInt(value));
+  set receivedAt(value: i32) {
+    this.set("receivedAt", Value.fromI32(value));
   }
 
   get processedAt(): i32 {
