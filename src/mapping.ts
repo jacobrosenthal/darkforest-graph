@@ -42,6 +42,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
 
 
 export function handleBlock(block: ethereum.Block): void {
+
     //todo get this from subgraph.yaml or elsewhere somehow?
     let contract = Contract.bind(Address.fromString("0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"));
 
@@ -107,17 +108,15 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     arrival.receivedAt = event.block.timestamp.toI32();
     arrival.save()
 
-    // todo if arrival time already hapened, just process it here
-
-    // just use the 1 second resolution 
+    // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
     let bucketTime = arrival.arrivalTime;
     let bucket = ArrivalsAtInterval.load(bucketTime.toString());
+    let arrivals: String[] = [];
     if (bucket === null) {
         bucket = new ArrivalsAtInterval(bucketTime.toString());
-        bucket.arrivals = [];
+    } else {
+        arrivals = bucket.arrivals;
     }
-    //i compressed all this to a few lines and it stopped working so.. leave it?
-    let arrivals = bucket.arrivals;
     arrivals.push(arrival.id);
     bucket.arrivals = arrivals;
     bucket.save();

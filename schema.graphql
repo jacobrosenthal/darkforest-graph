@@ -38,15 +38,15 @@ type ArrivalsAtInterval @entity  {
 
 type Meta @entity  {
     id: ID!
-    lastProcessed: Int!
+    lastProcessed: Int! # the last block timestamp the block handler processed arrivals for
 }
 
 type Arrival @entity {
     id: ID!
-    arrivalId: Int!
+    arrivalId: Int! # same as id, but sortable because its an int
     player: Player!
-    fromPlanet: BigInt!
-    toPlanet: BigInt!
+    fromPlanet: BigInt! # cant be saved as a planet because possibly wont be created until processed
+    toPlanet: BigInt! # cant be saved as a planet because possibly wont be created until processed
     popArriving: Int!
     silverMoved: Int!
     departureTime: Int!
