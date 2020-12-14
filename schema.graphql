@@ -36,6 +36,11 @@ type ArrivalsAtInterval @entity  {
     arrivals: [Arrival!]!
 }
 
+type Meta @entity  {
+    id: ID!
+    lastProcessed: BigInt!
+}
+
 type Arrival @entity {
     id: ID!
     arrivalId: BigInt!
@@ -48,7 +53,6 @@ type Arrival @entity {
     arrivalTime: BigInt!
     receivedAt: BigInt!
     processed: Boolean!
-    _lastProcessed: BigInt!
 }
 
 enum PlanetResource {

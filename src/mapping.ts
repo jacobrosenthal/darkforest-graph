@@ -6,7 +6,7 @@ import {
     PlayerInitialized,
     BoughtHat,
 } from "../generated/Contract/Contract";
-import { Arrival, ArrivalsAtInterval, Player, Planet } from "../generated/schema";
+import { Arrival, ArrivalsAtInterval, Meta, Player, Planet } from "../generated/schema";
 
 function toSpaceType(spaceType: string): string {
     if (spaceType == "0") {
@@ -45,11 +45,11 @@ export function handleBlock(block: ethereum.Block): void {
     //todo get this from subgraph.yaml or elsewhere somehow?
     let contract = Contract.bind(Address.fromString("0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"));
 
-    // dummy arrival sadly all just to hold the last timestap we processed _lastProcessed
-    let dummy = dummyArrival(block.timestamp);
+    // dummy arrival sadly all just to hold the last timestap we processed lastProcessed
+    let meta = loadMeta(block.timestamp);
 
     // look up last time and 1s incremets that dont exceed current time
-    for (let i = dummy._lastProcessed; i < block.timestamp; i = i + BigInt.fromI32(1)) {
+    for (let i = meta.lastProcessed; i < block.timestamp; i = i + BigInt.fromI32(1)) {
         let bucket = ArrivalsAtInterval.load(i.toString());
         if (bucket !== null) {
 
@@ -76,8 +76,8 @@ export function handleBlock(block: ethereum.Block): void {
     }
 
 
-    dummy._lastProcessed = block.timestamp;
-    dummy.save();
+    meta.lastProcessed = block.timestamp;
+    meta.save();
 }
 
 
@@ -103,7 +103,6 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     arrival.departureTime = rawArrival.value6;
     arrival.arrivalTime = rawArrival.value7;
     arrival.receivedAt = event.block.timestamp;
-    arrival._lastProcessed = BigInt.fromI32(0);//dummy variable 
     arrival.processed = false;
     arrival.save()
 
@@ -289,22 +288,12 @@ function newPlanet(contract: Contract | null, locationid: BigInt, ownerid: Strin
     return planet;
 }
 
-function dummyArrival(timestamp: BigInt): Arrival | null {
+function loadMeta(timestamp: BigInt): Meta | null {
 
-    let dummy = Arrival.load(BigInt.fromI32(i32.MAX_VALUE).toString());
-    if (dummy === null) {
-        dummy = new Arrival(BigInt.fromI32(i32.MAX_VALUE).toString());
-        dummy.arrivalId = BigInt.fromI32(i32.MAX_VALUE);
-        dummy.player = BigInt.fromI32(0).toHexString();
-        dummy.fromPlanet = BigInt.fromI32(0);
-        dummy.toPlanet = BigInt.fromI32(0);
-        dummy.popArriving = BigInt.fromI32(0);
-        dummy.silverMoved = BigInt.fromI32(0);
-        dummy.departureTime = BigInt.fromI32(0);
-        dummy.arrivalTime = BigInt.fromI32(0);
-        dummy.receivedAt = timestamp;
-        dummy.processed = false;
-        dummy._lastProcessed = timestamp;
+    let meta = Meta.load("0");
+    if (meta === null) {
+        meta = new Meta("0");
+        meta.lastProcessed = timestamp;
     }
-    return dummy;
+    return meta;
 }

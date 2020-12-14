@@ -339,6 +339,46 @@ export class ArrivalsAtInterval extends Entity {
   }
 }
 
+export class Meta extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Meta entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Meta entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Meta", id.toString(), this);
+  }
+
+  static load(id: string): Meta | null {
+    return store.get("Meta", id) as Meta | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get lastProcessed(): BigInt {
+    let value = this.get("lastProcessed");
+    return value.toBigInt();
+  }
+
+  set lastProcessed(value: BigInt) {
+    this.set("lastProcessed", Value.fromBigInt(value));
+  }
+}
+
 export class Arrival extends Entity {
   constructor(id: string) {
     super();
@@ -457,14 +497,5 @@ export class Arrival extends Entity {
 
   set processed(value: boolean) {
     this.set("processed", Value.fromBoolean(value));
-  }
-
-  get _lastProcessed(): BigInt {
-    let value = this.get("_lastProcessed");
-    return value.toBigInt();
-  }
-
-  set _lastProcessed(value: BigInt) {
-    this.set("_lastProcessed", Value.fromBigInt(value));
   }
 }
