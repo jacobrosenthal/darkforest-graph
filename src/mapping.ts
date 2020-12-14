@@ -69,7 +69,7 @@ export function handleBlock(block: ethereum.Block): void {
                 //do we always save it, because even if they didnt own it, interacting with it has changed its numbers?
                 planet.save();
 
-                a.processed = true;
+                a.processedAt = block.timestamp.toI32();
                 a.save();
             }
         }
@@ -103,7 +103,6 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     arrival.departureTime = rawArrival.value6;
     arrival.arrivalTime = rawArrival.value7;
     arrival.receivedAt = event.block.timestamp;
-    arrival.processed = false;
     arrival.save()
 
     // todo if arrival time already hapened, just process it here

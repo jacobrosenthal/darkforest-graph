@@ -490,12 +490,12 @@ export class Arrival extends Entity {
     this.set("receivedAt", Value.fromBigInt(value));
   }
 
-  get processed(): boolean {
-    let value = this.get("processed");
-    return value.toBoolean();
+  get processedAt(): i32 {
+    let value = this.get("processedAt");
+    return value.toI32();
   }
 
-  set processed(value: boolean) {
-    this.set("processed", Value.fromBoolean(value));
+  set processedAt(value: i32) {
+    this.set("processedAt", Value.fromI32(value));
   }
 }

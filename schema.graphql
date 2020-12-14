@@ -52,7 +52,7 @@ type Arrival @entity {
     departureTime: BigInt!
     arrivalTime: BigInt!
     receivedAt: BigInt!
-    processed: Boolean!
+    processedAt: Int
 }
 
 enum PlanetResource {
