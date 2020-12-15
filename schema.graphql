@@ -56,6 +56,21 @@ type Arrival @entity {
     processedAt: Int
 }
 
+type Hat @entity {
+    id: ID!
+    planet: Planet! # same as id, but sortable because its an int
+    player: Player!
+    hatLevel: Int
+    timestamp: Int
+}
+
+type Upgrade @entity {
+    id: ID!
+    planet: Planet! # same as id, but sortable because its an int
+    player: Player!
+    timestamp: Int
+}
+
 enum PlanetResource {
     NONE
     SILVER

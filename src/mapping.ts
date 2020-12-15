@@ -6,7 +6,7 @@ import {
     PlayerInitialized,
     BoughtHat,
 } from "../generated/Contract/Contract";
-import { Arrival, ArrivalsAtInterval, Meta, Player, Planet } from "../generated/schema";
+import { Arrival, ArrivalsAtInterval, Meta, Player, Planet, Hat, Upgrade } from "../generated/schema";
 
 // NOTE: the timestamps within are all unix epoch in seconds NOT MILLISECONDS
 // like in all the JS code where youll see divided by contractPrecision. As a
@@ -91,10 +91,23 @@ export function handleBlock(block: ethereum.Block): void {
 
 export function handleBoughtHat(event: BoughtHat): void {
     let contract = Contract.bind(event.address);
+
+    let rawPlanet = contract.planets(event.params.loc);
     let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
+
     let planet = Planet.load(event.params.loc.toHexString());
     planet.hatLevel = planetExtendedInfo.value8.toI32();
+    planet.lastUpdated = planetExtendedInfo.value2.toI32();
+    planet.population = rawPlanet.value4.toI32();
+    planet.silver = rawPlanet.value10.toI32();
     planet.save();
+
+    let hat = new Hat(event.params.loc.toHexString())
+    hat.player = planet.owner;
+    hat.planet = planet.id;
+    hat.hatLevel = planet.hatLevel;
+    hat.timestamp = planet.lastUpdated;
+    hat.save()
 }
 
 export function handleArrivalQueued(event: ArrivalQueued): void {
@@ -130,14 +143,24 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
 export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     let contract = Contract.bind(event.address);
 
+    let rawPlanet = contract.planets(event.params.loc);
     let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
+
     let planet = Planet.load(event.params.loc.toHexString());
+    planet.population = rawPlanet.value4.toI32();
+    planet.silver = rawPlanet.value10.toI32();
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
     planet.upgradeState0 = planetExtendedInfo.value5.toI32();
     planet.upgradeState1 = planetExtendedInfo.value6.toI32();
     planet.upgradeState2 = planetExtendedInfo.value7.toI32();
     planet.silverSpentComputed = calculateSilverSpent(planet);
     planet.save();
+
+    let upgrade = new Upgrade(planet.id);
+    upgrade.player = planet.owner;
+    upgrade.planet = planet.id;
+    upgrade.timestamp = planet.lastUpdated;
+    upgrade.save()
 }
 
 // todo can I type these to not be null somehow?

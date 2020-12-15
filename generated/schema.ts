@@ -516,3 +516,128 @@ export class Arrival extends Entity {
     this.set("processedAt", Value.fromI32(value));
   }
 }
+
+export class Hat extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Hat entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Hat entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Hat", id.toString(), this);
+  }
+
+  static load(id: string): Hat | null {
+    return store.get("Hat", id) as Hat | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get planet(): string {
+    let value = this.get("planet");
+    return value.toString();
+  }
+
+  set planet(value: string) {
+    this.set("planet", Value.fromString(value));
+  }
+
+  get player(): string {
+    let value = this.get("player");
+    return value.toString();
+  }
+
+  set player(value: string) {
+    this.set("player", Value.fromString(value));
+  }
+
+  get hatLevel(): i32 {
+    let value = this.get("hatLevel");
+    return value.toI32();
+  }
+
+  set hatLevel(value: i32) {
+    this.set("hatLevel", Value.fromI32(value));
+  }
+
+  get timestamp(): i32 {
+    let value = this.get("timestamp");
+    return value.toI32();
+  }
+
+  set timestamp(value: i32) {
+    this.set("timestamp", Value.fromI32(value));
+  }
+}
+
+export class Upgrade extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Upgrade entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Upgrade entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Upgrade", id.toString(), this);
+  }
+
+  static load(id: string): Upgrade | null {
+    return store.get("Upgrade", id) as Upgrade | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get planet(): string {
+    let value = this.get("planet");
+    return value.toString();
+  }
+
+  set planet(value: string) {
+    this.set("planet", Value.fromString(value));
+  }
+
+  get player(): string {
+    let value = this.get("player");
+    return value.toString();
+  }
+
+  set player(value: string) {
+    this.set("player", Value.fromString(value));
+  }
+
+  get timestamp(): i32 {
+    let value = this.get("timestamp");
+    return value.toI32();
+  }
+
+  set timestamp(value: i32) {
+    this.set("timestamp", Value.fromI32(value));
+  }
+}
