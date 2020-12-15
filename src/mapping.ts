@@ -177,11 +177,15 @@ function getSilverOverTime(
     if (planet.silver > planet.silverCap) {
         return planet.silverCap;
     }
-    let timeElapsed = endTimeS - startTimeS;
+
+    let timeElapsed: f64 = endTimeS - startTimeS;
+    let silverGrowth: f64 = planet.silverGrowth;
+    let silver: f64 = planet.silver;
+    let silverCap: f64 = planet.silverCap;
 
     return Math.min(
-        timeElapsed * planet.silverGrowth + planet.silver,
-        planet.silverCap
+        timeElapsed * silverGrowth + silver,
+        silverCap
     ) as i32;
 }
 
@@ -194,11 +198,14 @@ function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
         return planet.population;
     }
 
-    let timeElapsed = atTimeS - planet.lastUpdated;
+    let population: f64 = planet.population;
+    let populationCap: f64 = planet.populationCap;
+    let populationGrowth: f64 = planet.populationGrowth;
+    let timeElapsed: f64 = atTimeS - planet.lastUpdated;
 
-    let denominator = (Math.exp((-4 * planet.populationGrowth * timeElapsed) / planet.populationCap) *
-        (planet.populationCap / planet.population - 1) + 1);
-    return (planet.populationCap / denominator) as i32;
+    let denominator: f64 = (Math.exp((-4 * populationGrowth * timeElapsed) / populationCap) *
+        (populationCap / population - 1) + 1);
+    return (populationCap / denominator) as i32;
 }
 
 function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null {
