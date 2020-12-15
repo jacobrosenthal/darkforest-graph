@@ -12,7 +12,7 @@ import { Arrival, ArrivalsAtInterval, Meta, Player, Planet } from "../generated/
 // like in all the JS code where youll see divided by contractPrecision. As a
 // result be very careful with your copy pastes. And TODO, unify the codebases
 
-// A lot of the Math fn aren't available as BigDec so we get out of BigInt from
+// A lot of the Math fn aren't available as BigInt so we get out of BigInt from
 // the contract asap where possible. However due to overflows we cast variables
 // to f64 during calculations then back to i32 at the end avoid overflows.
 
@@ -54,7 +54,7 @@ export function handleBlock(block: ethereum.Block): void {
 
     let current = block.timestamp.toI32();
 
-    // dummy arrival sadly all just to hold the last timestap we processed lastProcessed
+    // first call setup and global to hold the last timestap we processed
     let meta = setup(current);
 
     // process last+1 up to and including current
@@ -70,6 +70,7 @@ export function handleBlock(block: ethereum.Block): void {
                 let a = arrivals[i];
                 let planet = Planet.load(a.toPlanetDec.toHexString());
                 if (planet === null) {
+                    // todo hardcoded
                     planet = newPlanet(contract, a.toPlanetDec, "0x0000000000000000000000000000000000000000");
                 }
 
@@ -163,7 +164,7 @@ function calculateSilverSpent(planet: Planet | null): i32 {
 
 
 function hasOwner(planet: Planet | null): boolean {
-    // planet.owner should never be null
+    // todo hardcoded. Note js versions dont carry around 0x prefix but we do
     return planet.owner !== "0x0000000000000000000000000000000000000000";
 };
 

@@ -1,13 +1,13 @@
 type Player @entity {
-    id: ID!
+    id: ID! # 0x prefixed hex string
     initTimestamp: Int!
-    homeWorld: Planet # allows null because 0x0 doesnt have a homeWorld
+    homeWorld: Planet # allows null because 0x0000000000000000000000000000000000000000 has no homeWorld
     planets: [Planet!]! @derivedFrom(field: "owner")
 }
 
 type Planet @entity {
-    id: ID! # locationid (hex) of the planet
-    locationDec: BigInt!
+    id: ID! # locationid 0x prefixed hex string
+    locationDec: BigInt! # loc decimal version of locationid
     owner: Player!
     isInitialized: Boolean!
     createdAt: Int!
@@ -29,7 +29,7 @@ type Planet @entity {
     hatLevel: Int!
     planetResource: PlanetResource!
     spaceType: SpaceType!
-    silverSpentComputed: Int!
+    silverSpentComputed: Int! # Computed cost of applied upgrades
 }
 
 type ArrivalsAtInterval @entity  {
