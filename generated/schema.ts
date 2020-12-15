@@ -51,13 +51,21 @@ export class Player extends Entity {
     this.set("initTimestamp", Value.fromI32(value));
   }
 
-  get homeWorld(): string {
+  get homeWorld(): string | null {
     let value = this.get("homeWorld");
-    return value.toString();
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  set homeWorld(value: string) {
-    this.set("homeWorld", Value.fromString(value));
+  set homeWorld(value: string | null) {
+    if (value === null) {
+      this.unset("homeWorld");
+    } else {
+      this.set("homeWorld", Value.fromString(value as string));
+    }
   }
 
   get planets(): Array<string> {
@@ -98,6 +106,15 @@ export class Planet extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get locationDec(): BigInt {
+    let value = this.get("locationDec");
+    return value.toBigInt();
+  }
+
+  set locationDec(value: BigInt) {
+    this.set("locationDec", Value.fromBigInt(value));
   }
 
   get owner(): string {
@@ -427,22 +444,22 @@ export class Arrival extends Entity {
     this.set("player", Value.fromString(value));
   }
 
-  get fromPlanet(): BigInt {
-    let value = this.get("fromPlanet");
+  get fromPlanetDec(): BigInt {
+    let value = this.get("fromPlanetDec");
     return value.toBigInt();
   }
 
-  set fromPlanet(value: BigInt) {
-    this.set("fromPlanet", Value.fromBigInt(value));
+  set fromPlanetDec(value: BigInt) {
+    this.set("fromPlanetDec", Value.fromBigInt(value));
   }
 
-  get toPlanet(): BigInt {
-    let value = this.get("toPlanet");
+  get toPlanetDec(): BigInt {
+    let value = this.get("toPlanetDec");
     return value.toBigInt();
   }
 
-  set toPlanet(value: BigInt) {
-    this.set("toPlanet", Value.fromBigInt(value));
+  set toPlanetDec(value: BigInt) {
+    this.set("toPlanetDec", Value.fromBigInt(value));
   }
 
   get popArriving(): i32 {

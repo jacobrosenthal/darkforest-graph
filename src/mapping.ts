@@ -12,6 +12,10 @@ import { Arrival, ArrivalsAtInterval, Meta, Player, Planet } from "../generated/
 // like in all the JS code where youll see divided by contractPrecision. As a
 // result be very careful with your copy pastes. And TODO, unify the codebases
 
+// A lot of the Math fn aren't available as BigDec so we get out of BigInt from
+// the contract asap where possible. However due to overflows we cast variables
+// to f64 during calculations then back to i32 at the end avoid overflows.
+
 function toSpaceType(spaceType: string): string {
     if (spaceType == "0") {
         return "NEBULA";
@@ -32,14 +36,14 @@ function toPlanetResource(planetResource: string): string {
 
 export function handlePlayerInitialized(event: PlayerInitialized): void {
     let contract = Contract.bind(event.address);
-    let locationid = event.params.loc;
+    let locationDec = event.params.loc;
 
     let player = new Player(event.params.player.toHexString());
     player.initTimestamp = event.block.timestamp.toI32();
-    player.homeWorld = locationid.toString();
+    player.homeWorld = locationDec.toHexString();
     player.save();
 
-    let planet = newPlanet(contract, locationid, player.id);
+    let planet = newPlanet(contract, locationDec, player.id);
     planet.save();
 }
 
@@ -51,7 +55,7 @@ export function handleBlock(block: ethereum.Block): void {
     let current = block.timestamp.toI32();
 
     // dummy arrival sadly all just to hold the last timestap we processed lastProcessed
-    let meta = loadMeta(current);
+    let meta = setup(current);
 
     // process last+1 up to and including current
     for (let i = meta.lastProcessed + 1; i <= current; i++) {
@@ -64,9 +68,9 @@ export function handleBlock(block: ethereum.Block): void {
             for (let i = 0; i < arrivals.length; i++) {
 
                 let a = arrivals[i];
-                let planet = Planet.load(a.toPlanet.toString());
+                let planet = Planet.load(a.toPlanetDec.toHexString());
                 if (planet === null) {
-                    planet = newPlanet(contract, a.toPlanet, "0000000000000000000000000000000000000000");
+                    planet = newPlanet(contract, a.toPlanetDec, "0x0000000000000000000000000000000000000000");
                 }
 
                 planet = arrive(planet, a);
@@ -80,7 +84,6 @@ export function handleBlock(block: ethereum.Block): void {
         }
     }
 
-
     meta.lastProcessed = current;
     meta.save();
 }
@@ -88,7 +91,7 @@ export function handleBlock(block: ethereum.Block): void {
 export function handleBoughtHat(event: BoughtHat): void {
     let contract = Contract.bind(event.address);
     let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
-    let planet = Planet.load(event.params.loc.toString());
+    let planet = Planet.load(event.params.loc.toHexString());
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.save();
 }
@@ -100,8 +103,8 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
     arrival.player = rawArrival.value1.toHexString();
-    arrival.fromPlanet = rawArrival.value2; // todo show as locationIdFromDecStr?
-    arrival.toPlanet = rawArrival.value3; // todo show as locationIdFromDecStr?
+    arrival.fromPlanetDec = rawArrival.value2;
+    arrival.toPlanetDec = rawArrival.value3;
     arrival.popArriving = rawArrival.value4.toI32();
     arrival.silverMoved = rawArrival.value5.toI32();
     arrival.departureTime = rawArrival.value6.toI32();
@@ -127,7 +130,7 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     let contract = Contract.bind(event.address);
 
     let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
-    let planet = Planet.load(event.params.loc.toString());
+    let planet = Planet.load(event.params.loc.toHexString());
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
     planet.upgradeState0 = planetExtendedInfo.value5.toI32();
     planet.upgradeState1 = planetExtendedInfo.value6.toI32();
@@ -161,7 +164,7 @@ function calculateSilverSpent(planet: Planet | null): i32 {
 
 function hasOwner(planet: Planet | null): boolean {
     // planet.owner should never be null
-    return planet.owner !== "0000000000000000000000000000000000000000";
+    return planet.owner !== "0x0000000000000000000000000000000000000000";
 };
 
 function getSilverOverTime(
@@ -225,45 +228,46 @@ function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null 
     return planet;
 }
 
-function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null {
+function arrive(toPlanetDec: Planet | null, arrival: Arrival | null): Planet | null {
 
-    // update toPlanet energy and silver right before arrival
-    toPlanet = updatePlanetToTime(toPlanet, arrival.arrivalTime);
+    // update toPlanetDec energy and silver right before arrival
+    toPlanetDec = updatePlanetToTime(toPlanetDec, arrival.arrivalTime);
 
     // apply energy
     let shipsMoved = arrival.popArriving;
 
-    if (arrival.player !== toPlanet.owner) {
+    if (arrival.player !== toPlanetDec.owner) {
         // attacking enemy - includes emptyAddress
 
-        if (toPlanet.population > Math.floor((shipsMoved * 100) / toPlanet.defense) as i32) {
+        if (toPlanetDec.population > Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32) {
             // attack reduces target planet's garrison but doesn't conquer it
-            toPlanet.population -= Math.floor((shipsMoved * 100) / toPlanet.defense) as i32;
+            toPlanetDec.population -= Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32;
         } else {
             // conquers planet
-            toPlanet.owner = arrival.player;
-            toPlanet.population = shipsMoved - Math.floor((toPlanet.population * toPlanet.defense) / 100) as i32;
+            toPlanetDec.owner = arrival.player;
+            toPlanetDec.population = shipsMoved - Math.floor((toPlanetDec.population * toPlanetDec.defense) / 100) as i32;
         }
     } else {
         // moving between my own planets
-        toPlanet.population += shipsMoved;
+        toPlanetDec.population += shipsMoved;
     }
 
     // apply silver
-    if (toPlanet.silver + arrival.silverMoved > toPlanet.silverCap) {
-        toPlanet.silver = toPlanet.silverCap;
+    if (toPlanetDec.silver + arrival.silverMoved > toPlanetDec.silverCap) {
+        toPlanetDec.silver = toPlanetDec.silverCap;
     } else {
-        toPlanet.silver += arrival.silverMoved;
+        toPlanetDec.silver += arrival.silverMoved;
     }
 
-    return toPlanet;
+    return toPlanetDec;
 }
 
-function newPlanet(contract: Contract | null, locationid: BigInt, ownerid: String): Planet | null {
+function newPlanet(contract: Contract | null, locationDec: BigInt, ownerid: String): Planet | null {
 
-    let rawPlanet = contract.planets(locationid);
-    let planetExtendedInfo = contract.planetsExtendedInfo(locationid);
-    let planet = new Planet(locationid.toString());
+    let rawPlanet = contract.planets(locationDec);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+    let planet = new Planet(locationDec.toHexString());
+    planet.locationDec = locationDec;
     planet.owner = ownerid;
     planet.isInitialized = planetExtendedInfo.value0;
     planet.createdAt = planetExtendedInfo.value1.toI32();
@@ -289,12 +293,18 @@ function newPlanet(contract: Contract | null, locationid: BigInt, ownerid: Strin
     return planet;
 }
 
-function loadMeta(timestamp: i32): Meta | null {
+function setup(timestamp: i32): Meta | null {
 
     let meta = Meta.load("0");
+
     if (meta === null) {
         meta = new Meta("0");
         meta.lastProcessed = timestamp;
+
+        let player = new Player("0x0000000000000000000000000000000000000000");
+        player.initTimestamp = timestamp;
+        player.save();
+
     }
     return meta;
 }

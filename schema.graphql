@@ -1,12 +1,13 @@
 type Player @entity {
     id: ID!
     initTimestamp: Int!
-    homeWorld: Planet!
+    homeWorld: Planet # allows null because 0x0 doesnt have a homeWorld
     planets: [Planet!]! @derivedFrom(field: "owner")
 }
 
 type Planet @entity {
-    id: ID! # location hash of the planet
+    id: ID! # locationid (hex) of the planet
+    locationDec: BigInt!
     owner: Player!
     isInitialized: Boolean!
     createdAt: Int!
@@ -45,8 +46,8 @@ type Arrival @entity {
     id: ID!
     arrivalId: Int! # same as id, but sortable because its an int
     player: Player!
-    fromPlanet: BigInt! # cant be saved as a planet because possibly wont be created until processed
-    toPlanet: BigInt! # cant be saved as a planet because possibly wont be created until processed
+    fromPlanetDec: BigInt! # cant be mapped as a planet because possibly wont be created until processed
+    toPlanetDec: BigInt! # cant be mapped as a planet because possibly wont be created until processed
     popArriving: Int!
     silverMoved: Int!
     departureTime: Int!
