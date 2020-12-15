@@ -8,6 +8,10 @@ import {
 } from "../generated/Contract/Contract";
 import { Arrival, ArrivalsAtInterval, Meta, Player, Planet } from "../generated/schema";
 
+// NOTE: the timestamps within are all unix epoch in seconds NOT MILLISECONDS
+// like in all the JS code where youll see divided by contractPrecision. As a
+// result be very careful with your copy pastes. And TODO, unify the codebases
+
 function toSpaceType(spaceType: string): string {
     if (spaceType == "0") {
         return "NEBULA";
@@ -39,11 +43,9 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     planet.save();
 }
 
-
-
 export function handleBlock(block: ethereum.Block): void {
 
-    //todo get this from subgraph.yaml or elsewhere somehow?
+    // todo get this from subgraph.yaml or elsewhere somehow?
     let contract = Contract.bind(Address.fromString("0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"));
 
     let current = block.timestamp.toI32();
@@ -56,10 +58,9 @@ export function handleBlock(block: ethereum.Block): void {
         let bucket = ArrivalsAtInterval.load(i.toString());
         if (bucket !== null) {
 
+            // multiple arrivals are in order of arrivalid
             let arrivals = bucket.arrivals.map<Arrival | null>(aid => Arrival.load(aid));
-            //todo what to sort by if same arrivaltime
 
-            //really no for of??
             for (let i = 0; i < arrivals.length; i++) {
 
                 let a = arrivals[i];
@@ -69,7 +70,8 @@ export function handleBlock(block: ethereum.Block): void {
                 }
 
                 planet = arrive(planet, a);
-                //do we always save it, because even if they didnt own it, interacting with it has changed its numbers?
+                // todo do we always save it, because even if they didnt own it,
+                // interacting with it has changed its numbers?
                 planet.save();
 
                 a.processedAt = current;
@@ -82,7 +84,6 @@ export function handleBlock(block: ethereum.Block): void {
     meta.lastProcessed = current;
     meta.save();
 }
-
 
 export function handleBoughtHat(event: BoughtHat): void {
     let contract = Contract.bind(event.address);
@@ -99,10 +100,10 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
     arrival.player = rawArrival.value1.toHexString();
-    arrival.fromPlanet = rawArrival.value2;//turn into locationIdFromDecStr?
-    arrival.toPlanet = rawArrival.value3;// turn into locationIdFromDecStr??
-    arrival.popArriving = rawArrival.value4.toI32();// / 1000;
-    arrival.silverMoved = rawArrival.value5.toI32();// / 1000;
+    arrival.fromPlanet = rawArrival.value2; // todo show as locationIdFromDecStr?
+    arrival.toPlanet = rawArrival.value3; // todo show as locationIdFromDecStr?
+    arrival.popArriving = rawArrival.value4.toI32();
+    arrival.silverMoved = rawArrival.value5.toI32();
     arrival.departureTime = rawArrival.value6.toI32();
     arrival.arrivalTime = rawArrival.value7.toI32();
     arrival.receivedAt = event.block.timestamp.toI32();
@@ -135,7 +136,7 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     planet.save();
 }
 
-//how to remove null
+// todo can I type these to not be null somehow?
 function calculateSilverSpent(planet: Planet | null): i32 {
     let upgradeState: i32[] = [
         planet.upgradeState0,
@@ -143,7 +144,7 @@ function calculateSilverSpent(planet: Planet | null): i32 {
         planet.upgradeState2,
     ];
 
-    //todo hardcoded?
+    // todo hardcoded?
     let upgradeCosts: i32[] = [20, 40, 60, 80, 100];
     let totalUpgrades = 0;
     for (let i = 0; i < upgradeState.length; i++) {
@@ -163,8 +164,6 @@ function hasOwner(planet: Planet | null): boolean {
     return planet.owner !== "0000000000000000000000000000000000000000";
 };
 
-
-//converted from ms to S
 function getSilverOverTime(
     planet: Planet | null,
     startTimeS: i32,
@@ -186,7 +185,6 @@ function getSilverOverTime(
     ) as i32;
 }
 
-//converted from ms to S
 function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
     if (planet.population === 0) {
         return 0;
@@ -195,17 +193,16 @@ function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
     if (!hasOwner(planet)) {
         return planet.population;
     }
+
     let timeElapsed = atTimeS - planet.lastUpdated;
+
     let denominator = (Math.exp((-4 * planet.populationGrowth * timeElapsed) / planet.populationCap) *
-        (planet.populationCap / planet.population - 1) + 1) as i32;
-    return planet.populationCap / denominator;
+        (planet.populationCap / planet.population - 1) + 1);
+    return (planet.populationCap / denominator) as i32;
 }
 
-
-
-//converted from ms to S
 function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null {
-    //todo hardcoded game endtime 
+    // todo hardcoded game endtime 
     // let safeEndS = Math.min(atTimeS, 1609372800) as i32;
     // if (safeEndS < planet.lastUpdated) {
     //     // console.error('tried to update planet to a past time');
@@ -220,7 +217,6 @@ function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null 
     planet.lastUpdated = atTimeS;
     return planet;
 }
-
 
 function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null {
 
@@ -256,8 +252,6 @@ function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null
     return toPlanet;
 }
 
-
-
 function newPlanet(contract: Contract | null, locationid: BigInt, ownerid: String): Planet | null {
 
     let rawPlanet = contract.planets(locationid);
@@ -271,12 +265,12 @@ function newPlanet(contract: Contract | null, locationid: BigInt, ownerid: Strin
     planet.range = rawPlanet.value1.toI32();
     planet.speed = rawPlanet.value2.toI32();
     planet.defense = rawPlanet.value3.toI32();
-    planet.population = rawPlanet.value4.toI32();// / 1000;
-    planet.populationCap = rawPlanet.value5.toI32();// / 1000;
-    planet.populationGrowth = rawPlanet.value6.toI32();// / 1000;
-    planet.silverCap = rawPlanet.value8.toI32();// / 1000;
-    planet.silverGrowth = rawPlanet.value9.toI32();// / 1000;
-    planet.silver = rawPlanet.value10.toI32();// / 1000;
+    planet.population = rawPlanet.value4.toI32();
+    planet.populationCap = rawPlanet.value5.toI32();
+    planet.populationGrowth = rawPlanet.value6.toI32();
+    planet.silverCap = rawPlanet.value8.toI32();
+    planet.silverGrowth = rawPlanet.value9.toI32();
+    planet.silver = rawPlanet.value10.toI32();
     planet.planetLevel = rawPlanet.value11.toI32();
     planet.upgradeState0 = planetExtendedInfo.value5.toI32();
     planet.upgradeState1 = planetExtendedInfo.value6.toI32();
