@@ -299,6 +299,46 @@ export class Planet extends Entity {
   }
 }
 
+export class ArrivalsAtInterval extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save ArrivalsAtInterval entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save ArrivalsAtInterval entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("ArrivalsAtInterval", id.toString(), this);
+  }
+
+  static load(id: string): ArrivalsAtInterval | null {
+    return store.get("ArrivalsAtInterval", id) as ArrivalsAtInterval | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get arrivals(): Array<string> {
+    let value = this.get("arrivals");
+    return value.toStringArray();
+  }
+
+  set arrivals(value: Array<string>) {
+    this.set("arrivals", Value.fromStringArray(value));
+  }
+}
+
 export class Arrival extends Entity {
   constructor(id: string) {
     super();
@@ -327,6 +367,15 @@ export class Arrival extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get arrivalId(): BigInt {
+    let value = this.get("arrivalId");
+    return value.toBigInt();
+  }
+
+  set arrivalId(value: BigInt) {
+    this.set("arrivalId", Value.fromBigInt(value));
   }
 
   get player(): string {
@@ -390,5 +439,32 @@ export class Arrival extends Entity {
 
   set arrivalTime(value: BigInt) {
     this.set("arrivalTime", Value.fromBigInt(value));
+  }
+
+  get receivedAt(): BigInt {
+    let value = this.get("receivedAt");
+    return value.toBigInt();
+  }
+
+  set receivedAt(value: BigInt) {
+    this.set("receivedAt", Value.fromBigInt(value));
+  }
+
+  get processed(): boolean {
+    let value = this.get("processed");
+    return value.toBoolean();
+  }
+
+  set processed(value: boolean) {
+    this.set("processed", Value.fromBoolean(value));
+  }
+
+  get _lastProcessed(): BigInt {
+    let value = this.get("_lastProcessed");
+    return value.toBigInt();
+  }
+
+  set _lastProcessed(value: BigInt) {
+    this.set("_lastProcessed", Value.fromBigInt(value));
   }
 }

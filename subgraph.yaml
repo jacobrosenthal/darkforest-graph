@@ -32,4 +32,7 @@ dataSources:
                 handler: handleArrivalQueued
               - event: PlayerInitialized(address,uint256)
                 handler: handlePlayerInitialized
+          blockHandlers:
+              - handler: handleBlock
+
           file: ./src/mapping.ts

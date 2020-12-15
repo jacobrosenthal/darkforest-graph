@@ -31,8 +31,14 @@ type Planet @entity {
     silverSpentComputed: Int!
 }
 
+type ArrivalsAtInterval @entity  {
+    id: ID!
+    arrivals: [Arrival!]!
+}
+
 type Arrival @entity {
     id: ID!
+    arrivalId: BigInt!
     player: Player!
     fromPlanet: BigInt!
     toPlanet: BigInt!
@@ -40,6 +46,9 @@ type Arrival @entity {
     silverMoved: BigInt!
     departureTime: BigInt!
     arrivalTime: BigInt!
+    receivedAt: BigInt!
+    processed: Boolean!
+    _lastProcessed: BigInt!
 }
 
 enum PlanetResource {
