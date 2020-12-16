@@ -44,7 +44,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     player.homeWorld = locationDec.toHexString();
     player.save();
 
-    let planet = newPlanet(contract, locationDec);
+    let planet = loadPlanetFromContract(contract, locationDec);
     planet.save();
 }
 
@@ -91,10 +91,12 @@ export function handleBoughtHat(event: BoughtHat): void {
     let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
 
     let planet = Planet.load(event.params.loc.toHexString());
-    planet.hatLevel = planetExtendedInfo.value8.toI32();
+    // refresh
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
     planet.population = rawPlanet.value4.toI32();
     planet.silver = rawPlanet.value10.toI32();
+    // apply hat
+    planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.save();
 
     let hat = new Hat(event.params.loc.toHexString())
@@ -125,15 +127,16 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     let toPlanet = Planet.load(toPlanetDec.toHexString());
     // might not exist for us yet
     if (toPlanet === null) {
-        toPlanet = newPlanet(contract, toPlanetDec);
+        toPlanet = loadPlanetFromContract(contract, toPlanetDec);
+    } else {
+        // if we didnt just get it from contract, refresh it
+        let rawToPlanet = contract.planets(toPlanetDec);
+        let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
+        toPlanet.lastUpdated = toPlanetExtendedInfo.value2.toI32();
+        toPlanet.population = rawToPlanet.value4.toI32();
+        toPlanet.silver = rawToPlanet.value10.toI32();
+        toPlanet.save();
     }
-    //refresh
-    let rawToPlanet = contract.planets(toPlanetDec);
-    let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
-    toPlanet.lastUpdated = toPlanetExtendedInfo.value2.toI32();
-    toPlanet.population = rawToPlanet.value4.toI32();
-    toPlanet.silver = rawToPlanet.value10.toI32();
-    toPlanet.save();
 
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
@@ -170,12 +173,15 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
 
     let planet = Planet.load(event.params.loc.toHexString());
+    // refresh
     planet.population = rawPlanet.value4.toI32();
     planet.silver = rawPlanet.value10.toI32();
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
+    // apply upgrade
     planet.upgradeState0 = planetExtendedInfo.value5.toI32();
     planet.upgradeState1 = planetExtendedInfo.value6.toI32();
     planet.upgradeState2 = planetExtendedInfo.value7.toI32();
+    // recalculate silver spent
     planet.silverSpentComputed = calculateSilverSpent(planet);
     planet.save();
 
@@ -210,10 +216,7 @@ function calculateSilverSpent(planet: Planet | null): i32 {
     return (totalUpgradeCostPercent / 100) * planet.silverCap;
 }
 
-
 function hasOwner(planet: Planet | null): boolean {
-    // todo hardcoded. Note js versions dont carry around 0x prefix but we do
-    // todo does it match?
     return planet.owner !== "0x0000000000000000000000000000000000000000";
 };
 
@@ -312,7 +315,9 @@ function arrive(toPlanetDec: Planet | null, arrival: Arrival | null): Planet | n
     return toPlanetDec;
 }
 
-function newPlanet(contract: Contract | null, locationDec: BigInt): Planet | null {
+// todo pull refresh out to its own fn call. if it doesnt cost any extra
+// contract calls
+function loadPlanetFromContract(contract: Contract | null, locationDec: BigInt): Planet | null {
 
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
