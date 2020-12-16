@@ -252,31 +252,31 @@ export class Planet extends Entity {
     this.set("planetLevel", Value.fromI32(value));
   }
 
-  get upgradeState0(): i32 {
-    let value = this.get("upgradeState0");
+  get rangeUpgrades(): i32 {
+    let value = this.get("rangeUpgrades");
     return value.toI32();
   }
 
-  set upgradeState0(value: i32) {
-    this.set("upgradeState0", Value.fromI32(value));
+  set rangeUpgrades(value: i32) {
+    this.set("rangeUpgrades", Value.fromI32(value));
   }
 
-  get upgradeState1(): i32 {
-    let value = this.get("upgradeState1");
+  get speedUpgrades(): i32 {
+    let value = this.get("speedUpgrades");
     return value.toI32();
   }
 
-  set upgradeState1(value: i32) {
-    this.set("upgradeState1", Value.fromI32(value));
+  set speedUpgrades(value: i32) {
+    this.set("speedUpgrades", Value.fromI32(value));
   }
 
-  get upgradeState2(): i32 {
-    let value = this.get("upgradeState2");
+  get defenseUpgrades(): i32 {
+    let value = this.get("defenseUpgrades");
     return value.toI32();
   }
 
-  set upgradeState2(value: i32) {
-    this.set("upgradeState2", Value.fromI32(value));
+  set defenseUpgrades(value: i32) {
+    this.set("defenseUpgrades", Value.fromI32(value));
   }
 
   get hatLevel(): i32 {

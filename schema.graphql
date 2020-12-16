@@ -23,9 +23,9 @@ type Planet @entity {
     silverGrowth: Int!
     silver: Int!
     planetLevel: Int!
-    upgradeState0: Int!
-    upgradeState1: Int!
-    upgradeState2: Int!
+    rangeUpgrades: Int!
+    speedUpgrades: Int!
+    defenseUpgrades: Int!
     hatLevel: Int!
     planetResource: PlanetResource!
     spaceType: SpaceType!

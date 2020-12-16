@@ -186,9 +186,9 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
 // todo can I type these to not be null somehow?
 function calculateSilverSpent(planet: Planet | null): i32 {
     let upgradeState: i32[] = [
-        planet.upgradeState0,
-        planet.upgradeState1,
-        planet.upgradeState2,
+        planet.rangeUpgrades,
+        planet.speedUpgrades,
+        planet.defenseUpgrades,
     ];
 
     // todo hardcoded?
@@ -321,9 +321,9 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.silverGrowth = rawPlanet.value9.toI32();
     planet.silver = rawPlanet.value10.toI32();
     planet.planetLevel = rawPlanet.value11.toI32();
-    planet.upgradeState0 = planetExtendedInfo.value5.toI32();
-    planet.upgradeState1 = planetExtendedInfo.value6.toI32();
-    planet.upgradeState2 = planetExtendedInfo.value7.toI32();
+    planet.rangeUpgrades = planetExtendedInfo.value5.toI32();
+    planet.speedUpgrades = planetExtendedInfo.value6.toI32();
+    planet.defenseUpgrades = planetExtendedInfo.value7.toI32();
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.silverSpentComputed = 0;
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
