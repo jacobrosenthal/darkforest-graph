@@ -44,7 +44,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     player.homeWorld = locationDec.toHexString();
     player.save();
 
-    let planet = newPlanet(contract, locationDec, player.id);
+    let planet = newPlanet(contract, locationDec);
     planet.save();
 }
 
@@ -73,7 +73,7 @@ export function handleBlock(block: ethereum.Block): void {
                 //todo why not go ahead and create planet on arrival if possible
                 if (planet === null) {
                     // todo hardcoded
-                    planet = newPlanet(contract, a.toPlanetDec, "0x0000000000000000000000000000000000000000");
+                    planet = newPlanet(contract, a.toPlanetDec);
                 }
 
                 planet = arrive(planet, a);
@@ -114,6 +114,8 @@ export function handleBoughtHat(event: BoughtHat): void {
 
 export function handleArrivalQueued(event: ArrivalQueued): void {
     let contract = Contract.bind(event.address);
+
+    //todo would be nice to remove energy from planet here...
 
     let rawArrival = contract.planetArrivals(event.params.arrivalId);
     let arrival = new Arrival(event.params.arrivalId.toString());
@@ -161,8 +163,10 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     planet.silverSpentComputed = calculateSilverSpent(planet);
     planet.save();
 
+    //using planet hex location as id because nothing else to index by
     let upgrade = new Upgrade(planet.id);
     upgrade.player = planet.owner;
+    //also tying it to a planet
     upgrade.planet = planet.id;
     upgrade.timestamp = planet.lastUpdated;
     upgrade.save()
@@ -193,6 +197,7 @@ function calculateSilverSpent(planet: Planet | null): i32 {
 
 function hasOwner(planet: Planet | null): boolean {
     // todo hardcoded. Note js versions dont carry around 0x prefix but we do
+    // todo does it match?
     return planet.owner !== "0x0000000000000000000000000000000000000000";
 };
 
@@ -293,13 +298,13 @@ function arrive(toPlanetDec: Planet | null, arrival: Arrival | null): Planet | n
     return toPlanetDec;
 }
 
-function newPlanet(contract: Contract | null, locationDec: BigInt, ownerid: String): Planet | null {
+function newPlanet(contract: Contract | null, locationDec: BigInt): Planet | null {
 
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
     let planet = new Planet(locationDec.toHexString());
     planet.locationDec = locationDec;
-    planet.owner = ownerid;
+    planet.owner = rawPlanet.value0.toHexString();;
     planet.isInitialized = planetExtendedInfo.value0;
     planet.createdAt = planetExtendedInfo.value1.toI32();
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
