@@ -106,7 +106,7 @@ export function handleBoughtHat(event: BoughtHat): void {
     hat.planet = planet.id;
     hat.hatLevel = planet.hatLevel;
     hat.timestamp = planet.lastUpdated;
-    hat.save()
+    hat.save();
 }
 
 export function handleArrivalQueued(event: ArrivalQueued): void {
@@ -124,23 +124,23 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     fromPlanet.lastUpdated = fromPlanetExtendedInfo.value2.toI32();
     fromPlanet.population = rawFromPlanet.value4.toI32();
     fromPlanet.silver = rawFromPlanet.value10.toI32();
-    fromPlanet.save()
+    fromPlanet.save();
 
     let toPlanetDec = rawArrival.value3
     let toPlanet = Planet.load(toPlanetDec.toHexString());
     // might not exist for us yet
     if (toPlanet === null) {
         toPlanet = loadPlanetFromContract(contract, toPlanetDec);
-    } else {
-        // if we didnt just get it from contract, refresh it
-        let rawToPlanet = contract.planets(toPlanetDec);
-        let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
-        toPlanet.owner = rawToPlanet.value0.toHexString();
-        toPlanet.lastUpdated = toPlanetExtendedInfo.value2.toI32();
-        toPlanet.population = rawToPlanet.value4.toI32();
-        toPlanet.silver = rawToPlanet.value10.toI32();
-        toPlanet.save();
     }
+
+    // refresh.. wating another contract call...
+    let rawToPlanet = contract.planets(toPlanetDec);
+    let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
+    toPlanet.owner = rawToPlanet.value0.toHexString();
+    toPlanet.lastUpdated = toPlanetExtendedInfo.value2.toI32();
+    toPlanet.population = rawToPlanet.value4.toI32();
+    toPlanet.silver = rawToPlanet.value10.toI32();
+    toPlanet.save();
 
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
@@ -152,7 +152,7 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     arrival.departureTime = rawArrival.value6.toI32();
     arrival.arrivalTime = rawArrival.value7.toI32();
     arrival.receivedAt = event.block.timestamp.toI32();
-    arrival.save()
+    arrival.save();
 
     // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
     let bucketTime = arrival.arrivalTime;
@@ -196,7 +196,7 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     //also tying it to a planet
     upgrade.planet = planet.id;
     upgrade.timestamp = planet.lastUpdated;
-    upgrade.save()
+    upgrade.save();
 }
 
 // todo can I type these to not be null somehow?
