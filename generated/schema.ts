@@ -444,22 +444,22 @@ export class Arrival extends Entity {
     this.set("player", Value.fromString(value));
   }
 
-  get fromPlanetDec(): BigInt {
-    let value = this.get("fromPlanetDec");
-    return value.toBigInt();
+  get fromPlanet(): string {
+    let value = this.get("fromPlanet");
+    return value.toString();
   }
 
-  set fromPlanetDec(value: BigInt) {
-    this.set("fromPlanetDec", Value.fromBigInt(value));
+  set fromPlanet(value: string) {
+    this.set("fromPlanet", Value.fromString(value));
   }
 
-  get toPlanetDec(): BigInt {
-    let value = this.get("toPlanetDec");
-    return value.toBigInt();
+  get toPlanet(): string {
+    let value = this.get("toPlanet");
+    return value.toString();
   }
 
-  set toPlanetDec(value: BigInt) {
-    this.set("toPlanetDec", Value.fromBigInt(value));
+  set toPlanet(value: string) {
+    this.set("toPlanet", Value.fromString(value));
   }
 
   get popArriving(): i32 {

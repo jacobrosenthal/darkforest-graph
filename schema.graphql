@@ -46,8 +46,8 @@ type Arrival @entity {
     id: ID!
     arrivalId: Int! # same as id, but sortable because its an int
     player: Player!
-    fromPlanetDec: BigInt! # cant be mapped as a planet because possibly wont be created until processed
-    toPlanetDec: BigInt! # cant be mapped as a planet because possibly wont be created until processed
+    fromPlanet: Planet!
+    toPlanet: Planet!
     popArriving: Int!
     silverMoved: Int!
     departureTime: Int!

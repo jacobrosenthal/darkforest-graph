@@ -69,16 +69,9 @@ export function handleBlock(block: ethereum.Block): void {
             for (let i = 0; i < arrivals.length; i++) {
 
                 let a = arrivals[i];
-                let planet = Planet.load(a.toPlanetDec.toHexString());
-                //todo why not go ahead and create planet on arrival if possible
-                if (planet === null) {
-                    // todo hardcoded
-                    planet = newPlanet(contract, a.toPlanetDec);
-                }
 
+                let planet = Planet.load(a.toPlanet);
                 planet = arrive(planet, a);
-                // todo do we always save it, because even if they didnt own it,
-                // interacting with it has changed its numbers?
                 planet.save();
 
                 a.processedAt = current;
@@ -115,15 +108,38 @@ export function handleBoughtHat(event: BoughtHat): void {
 export function handleArrivalQueued(event: ArrivalQueued): void {
     let contract = Contract.bind(event.address);
 
-    //todo would be nice to remove energy from planet here...
-
     let rawArrival = contract.planetArrivals(event.params.arrivalId);
+
+    let fromPlanetDec = rawArrival.value2;
+    //always exists
+    let fromPlanet = Planet.load(fromPlanetDec.toHexString());
+    //refresh
+    let rawFromPlanet = contract.planets(fromPlanetDec);
+    let fromPlanetExtendedInfo = contract.planetsExtendedInfo(fromPlanetDec);
+    fromPlanet.lastUpdated = fromPlanetExtendedInfo.value2.toI32();
+    fromPlanet.population = rawFromPlanet.value4.toI32();
+    fromPlanet.silver = rawFromPlanet.value10.toI32();
+    fromPlanet.save()
+
+    let toPlanetDec = rawArrival.value3
+    let toPlanet = Planet.load(toPlanetDec.toHexString());
+    // might not exist for us yet
+    if (toPlanet === null) {
+        toPlanet = newPlanet(contract, toPlanetDec);
+    }
+    //refresh
+    let rawToPlanet = contract.planets(toPlanetDec);
+    let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
+    toPlanet.lastUpdated = toPlanetExtendedInfo.value2.toI32();
+    toPlanet.population = rawToPlanet.value4.toI32();
+    toPlanet.silver = rawToPlanet.value10.toI32();
+    toPlanet.save();
+
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
     arrival.player = rawArrival.value1.toHexString();
-    // todo maybe I can link these to planets
-    arrival.fromPlanetDec = rawArrival.value2;
-    arrival.toPlanetDec = rawArrival.value3;
+    arrival.fromPlanet = fromPlanet.id;
+    arrival.toPlanet = toPlanet.id;
     arrival.popArriving = rawArrival.value4.toI32();
     arrival.silverMoved = rawArrival.value5.toI32();
     arrival.departureTime = rawArrival.value6.toI32();
@@ -244,8 +260,6 @@ function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
         (populationCap / population - 1) + 1);
     return (populationCap / denominator) as i32;
 }
-
-//todo contract precision??? 
 
 function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null {
     // todo hardcoded game endtime 
