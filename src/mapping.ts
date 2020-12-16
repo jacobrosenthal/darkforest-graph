@@ -92,9 +92,11 @@ export function handleBoughtHat(event: BoughtHat): void {
 
     let planet = Planet.load(event.params.loc.toHexString());
     // refresh
+    planet.owner = rawPlanet.value0.toHexString();
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
     planet.population = rawPlanet.value4.toI32();
     planet.silver = rawPlanet.value10.toI32();
+
     // apply hat
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.save();
@@ -118,6 +120,7 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     //refresh
     let rawFromPlanet = contract.planets(fromPlanetDec);
     let fromPlanetExtendedInfo = contract.planetsExtendedInfo(fromPlanetDec);
+    fromPlanet.owner = rawFromPlanet.value0.toHexString();
     fromPlanet.lastUpdated = fromPlanetExtendedInfo.value2.toI32();
     fromPlanet.population = rawFromPlanet.value4.toI32();
     fromPlanet.silver = rawFromPlanet.value10.toI32();
@@ -132,6 +135,7 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
         // if we didnt just get it from contract, refresh it
         let rawToPlanet = contract.planets(toPlanetDec);
         let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
+        toPlanet.owner = rawToPlanet.value0.toHexString();
         toPlanet.lastUpdated = toPlanetExtendedInfo.value2.toI32();
         toPlanet.population = rawToPlanet.value4.toI32();
         toPlanet.silver = rawToPlanet.value10.toI32();
@@ -174,6 +178,7 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
 
     let planet = Planet.load(event.params.loc.toHexString());
     // refresh
+    planet.owner = rawPlanet.value0.toHexString();
     planet.population = rawPlanet.value4.toI32();
     planet.silver = rawPlanet.value10.toI32();
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
@@ -323,7 +328,7 @@ function loadPlanetFromContract(contract: Contract | null, locationDec: BigInt):
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
     let planet = new Planet(locationDec.toHexString());
     planet.locationDec = locationDec;
-    planet.owner = rawPlanet.value0.toHexString();;
+    planet.owner = rawPlanet.value0.toHexString();
     planet.isInitialized = planetExtendedInfo.value0;
     planet.createdAt = planetExtendedInfo.value1.toI32();
     planet.lastUpdated = planetExtendedInfo.value2.toI32();
