@@ -38,6 +38,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     let contract = Contract.bind(event.address);
     let locationDec = event.params.loc;
 
+    // todo 0 pad??
     let player = new Player(event.params.player.toHexString());
     player.initTimestamp = event.block.timestamp.toI32();
     player.homeWorld = locationDec.toHexString();
@@ -69,6 +70,7 @@ export function handleBlock(block: ethereum.Block): void {
 
                 let a = arrivals[i];
                 let planet = Planet.load(a.toPlanetDec.toHexString());
+                //todo why not go ahead and create planet on arrival if possible
                 if (planet === null) {
                     // todo hardcoded
                     planet = newPlanet(contract, a.toPlanetDec, "0x0000000000000000000000000000000000000000");
@@ -117,6 +119,7 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
     arrival.player = rawArrival.value1.toHexString();
+    // todo maybe I can link these to planets
     arrival.fromPlanetDec = rawArrival.value2;
     arrival.toPlanetDec = rawArrival.value3;
     arrival.popArriving = rawArrival.value4.toI32();
@@ -139,6 +142,8 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     bucket.arrivals = arrivals;
     bucket.save();
 }
+
+//planet hasHarvestedArtifact new column
 
 export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     let contract = Contract.bind(event.address);
@@ -234,6 +239,8 @@ function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
         (populationCap / population - 1) + 1);
     return (populationCap / denominator) as i32;
 }
+
+//todo contract precision??? 
 
 function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null {
     // todo hardcoded game endtime 
