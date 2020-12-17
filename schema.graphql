@@ -16,12 +16,12 @@ type Planet @entity {
     range: Int!
     speed: Int!
     defense: Int!
-    population: Int!
+    populationLazy: Int!
     populationCap: Int!
     populationGrowth: Int!
     silverCap: Int!
     silverGrowth: Int!
-    silver: Int!
+    silverLazy: Int!
     planetLevel: Int!
     rangeUpgrades: Int!
     speedUpgrades: Int!

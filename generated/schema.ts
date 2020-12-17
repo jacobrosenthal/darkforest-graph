@@ -189,13 +189,13 @@ export class Planet extends Entity {
     this.set("defense", Value.fromI32(value));
   }
 
-  get population(): i32 {
-    let value = this.get("population");
+  get populationLazy(): i32 {
+    let value = this.get("populationLazy");
     return value.toI32();
   }
 
-  set population(value: i32) {
-    this.set("population", Value.fromI32(value));
+  set populationLazy(value: i32) {
+    this.set("populationLazy", Value.fromI32(value));
   }
 
   get populationCap(): i32 {
@@ -234,13 +234,13 @@ export class Planet extends Entity {
     this.set("silverGrowth", Value.fromI32(value));
   }
 
-  get silver(): i32 {
-    let value = this.get("silver");
+  get silverLazy(): i32 {
+    let value = this.get("silverLazy");
     return value.toI32();
   }
 
-  set silver(value: i32) {
-    this.set("silver", Value.fromI32(value));
+  set silverLazy(value: i32) {
+    this.set("silverLazy", Value.fromI32(value));
   }
 
   get planetLevel(): i32 {

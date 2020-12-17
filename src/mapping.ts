@@ -229,16 +229,16 @@ function getSilverOverTime(
 ): i32 {
 
     if (!hasOwner(planet)) {
-        return planet.silver;
+        return planet.silverLazy;
     }
 
-    if (planet.silver > planet.silverCap) {
+    if (planet.silverLazy > planet.silverCap) {
         return planet.silverCap;
     }
 
     let timeElapsed: f64 = endTimeS - startTimeS;
     let silverGrowth: f64 = planet.silverGrowth;
-    let silver: f64 = planet.silver;
+    let silver: f64 = planet.silverLazy;
     let silverCap: f64 = planet.silverCap;
 
     return Math.min(
@@ -248,15 +248,15 @@ function getSilverOverTime(
 }
 
 function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
-    if (planet.population === 0) {
+    if (planet.populationLazy === 0) {
         return 0;
     }
 
     if (!hasOwner(planet)) {
-        return planet.population;
+        return planet.populationLazy;
     }
 
-    let population: f64 = planet.population;
+    let population: f64 = planet.populationLazy;
     let populationCap: f64 = planet.populationCap;
     let populationGrowth: f64 = planet.populationGrowth;
     let timeElapsed: f64 = atTimeS - planet.lastUpdated;
@@ -273,12 +273,12 @@ function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null 
     //     // console.error('tried to update planet to a past time');
     //     return planet;
     // }
-    planet.silver = getSilverOverTime(
+    planet.silverLazy = getSilverOverTime(
         planet,
         planet.lastUpdated,
         atTimeS
     );
-    planet.population = getEnergyAtTime(planet, atTimeS);
+    planet.populationLazy = getEnergyAtTime(planet, atTimeS);
     planet.lastUpdated = atTimeS;
     return planet;
 }
@@ -294,24 +294,24 @@ function arrive(toPlanetDec: Planet | null, arrival: Arrival | null): Planet | n
     if (arrival.player !== toPlanetDec.owner) {
         // attacking enemy - includes emptyAddress
 
-        if (toPlanetDec.population > Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32) {
+        if (toPlanetDec.populationLazy > Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32) {
             // attack reduces target planet's garrison but doesn't conquer it
-            toPlanetDec.population -= Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32;
+            toPlanetDec.populationLazy -= Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32;
         } else {
             // conquers planet
             toPlanetDec.owner = arrival.player;
-            toPlanetDec.population = shipsMoved - Math.floor((toPlanetDec.population * toPlanetDec.defense) / 100) as i32;
+            toPlanetDec.populationLazy = shipsMoved - Math.floor((toPlanetDec.populationLazy * toPlanetDec.defense) / 100) as i32;
         }
     } else {
         // moving between my own planets
-        toPlanetDec.population += shipsMoved;
+        toPlanetDec.populationLazy += shipsMoved;
     }
 
     // apply silver
-    if (toPlanetDec.silver + arrival.silverMoved > toPlanetDec.silverCap) {
-        toPlanetDec.silver = toPlanetDec.silverCap;
+    if (toPlanetDec.silverLazy + arrival.silverMoved > toPlanetDec.silverCap) {
+        toPlanetDec.silverLazy = toPlanetDec.silverCap;
     } else {
-        toPlanetDec.silver += arrival.silverMoved;
+        toPlanetDec.silverLazy += arrival.silverMoved;
     }
 
     return toPlanetDec;
@@ -347,12 +347,12 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.range = rawPlanet.value1.toI32();
     planet.speed = rawPlanet.value2.toI32();
     planet.defense = rawPlanet.value3.toI32();
-    planet.population = rawPlanet.value4.toI32();
+    planet.populationLazy = rawPlanet.value4.toI32();
     planet.populationCap = rawPlanet.value5.toI32();
     planet.populationGrowth = rawPlanet.value6.toI32();
     planet.silverCap = rawPlanet.value8.toI32();
     planet.silverGrowth = rawPlanet.value9.toI32();
-    planet.silver = rawPlanet.value10.toI32();
+    planet.silverLazy = rawPlanet.value10.toI32();
     planet.planetLevel = rawPlanet.value11.toI32();
     planet.rangeUpgrades = planetExtendedInfo.value5.toI32();
     planet.speedUpgrades = planetExtendedInfo.value6.toI32();
