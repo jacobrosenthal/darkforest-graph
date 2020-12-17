@@ -62,7 +62,7 @@ export function handleBlock(block: ethereum.Block): void {
 
     processArrivals(meta, current, contract);
 
-    scheduleArrivalsAndRefresh(block, contract);
+    scheduleArrivalsAndRefresh(current, contract);
 
     meta.lastProcessed = current;
     meta.save();
@@ -129,9 +129,9 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
 }
 
 
-function scheduleArrivalsAndRefresh(block: ethereum.Block, contract: Contract): void {
+function scheduleArrivalsAndRefresh(current: i32, contract: Contract): void {
     //process unprocessed arrivals
-    let unprocessed = UnprocessedArrivalIdQueue.load(block.timestamp.toString());
+    let unprocessed = UnprocessedArrivalIdQueue.load(current.toString());
     if (unprocessed !== null) {
 
         let arrivalIds = unprocessed.arrivalIds;
@@ -161,21 +161,30 @@ function scheduleArrivalsAndRefresh(block: ethereum.Block, contract: Contract): 
             arrival.silverMoved = rawArrival.value5.toI32();
             arrival.departureTime = rawArrival.value6.toI32();
             arrival.arrivalTime = rawArrival.value7.toI32();
-            arrival.receivedAt = block.timestamp.toI32();
-            arrival.save();
+            arrival.receivedAt = current;
 
-            // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
             let arrivalTime = arrival.arrivalTime;
-            let pending = PendingArrivalQueue.load(arrivalTime.toString());
-            let arrivals: String[] = [];
-            if (pending === null) {
-                pending = new PendingArrivalQueue(arrivalTime.toString());
-            } else {
-                arrivals = pending.arrivals;
+            //contract applied it for us, just mark as processed
+            if (arrivalTime <= current) {
+                arrival.processedAt = current;
             }
-            arrivals.push(arrival.id);
-            pending.arrivals = arrivals;
-            pending.save();
+            // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
+            else {
+
+                let pending = PendingArrivalQueue.load(arrivalTime.toString());
+                let arrivals: String[] = [];
+                if (pending === null) {
+                    pending = new PendingArrivalQueue(arrivalTime.toString());
+                } else {
+                    arrivals = pending.arrivals;
+                }
+                arrivals.push(arrival.id);
+                pending.arrivals = arrivals;
+                pending.save();
+
+            }
+
+            arrival.save();
         }
     }
 
