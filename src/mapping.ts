@@ -60,9 +60,9 @@ export function handleBlock(block: ethereum.Block): void {
     // first call setup and global to hold the last timestap we processed
     let meta = setup(current);
 
-    scheduleArrivalsAndRefresh(block, contract);
-
     processArrivals(meta, current, contract);
+
+    scheduleArrivalsAndRefresh(block, contract);
 
     meta.lastProcessed = current;
     meta.save();
