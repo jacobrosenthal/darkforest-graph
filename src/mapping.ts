@@ -115,16 +115,7 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
 
     let rawArrival = contract.planetArrivals(event.params.arrivalId);
 
-    // always exists
-    let fromPlanetDec = rawArrival.value2;
-    let fromPlanetLocationId = locationDecToLocationId(fromPlanetDec);
-    let fromPlanet = Planet.load(fromPlanetLocationId);
-    let rawFromPlanet = contract.planets(fromPlanetDec);
-    let fromPlanetExtendedInfo = contract.planetsExtendedInfo(fromPlanetDec);
-    fromPlanet = refreshPlanetFromContract(fromPlanet, rawFromPlanet, fromPlanetExtendedInfo);
-    fromPlanet.save();
-
-    // might not exist for us yet
+    //only refresh the toPlanet, and only if the toPlanet is not already in our Planets store
     let toPlanetDec = rawArrival.value3
     let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
     let toPlanet = Planet.load(toPlanetLocationId);
@@ -132,16 +123,15 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
     if (toPlanet === null) {
         toPlanet = newPlanet(toPlanetDec, rawToPlanet, toPlanetExtendedInfo);
-    } else {
-        toPlanet = refreshPlanetFromContract(toPlanet, rawToPlanet, toPlanetExtendedInfo);
     }
     toPlanet.save();
 
+    let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
     // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
     arrival.player = rawArrival.value1.toHexString();
-    arrival.fromPlanet = fromPlanet.id;
+    arrival.fromPlanet = fromPlanetLocationId;
     arrival.toPlanet = toPlanet.id;
     arrival.popArriving = rawArrival.value4.toI32();
     arrival.silverMoved = rawArrival.value5.toI32();
