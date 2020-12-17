@@ -18,6 +18,8 @@ import { Arrival, ArrivalsAtInterval, Meta, Player, Planet, Hat, Upgrade } from 
 // the contract asap where possible. However due to overflows we cast variables
 // to f64 during calculations then back to i32 at the end avoid overflows.
 
+// NOTE toHexString() doesnt 0 pad any of our strings currently
+
 function toSpaceType(spaceType: string): string {
     if (spaceType == "0") {
         return "NEBULA";
@@ -43,16 +45,14 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     // todo 0 pad??
     let player = new Player(event.params.player.toHexString());
     player.initTimestamp = event.block.timestamp.toI32();
-    player.homeWorld = locationDec.toHexString();
+    player.homeWorld = locationDecToLocationId(locationDec);
     player.save();
 
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
-    let planet = new Planet(locationDec.toHexString());
-    planet.locationDec = locationDec;
-    // beats me
-    let p: Planet | null = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
-    p.save();
+
+    let planet = newPlanet(locationDec, rawPlanet, planetExtendedInfo);
+    planet.save();
 }
 
 export function handleBlock(block: ethereum.Block): void {
@@ -94,14 +94,17 @@ export function handleBlock(block: ethereum.Block): void {
 export function handleBoughtHat(event: BoughtHat): void {
     let contract = Contract.bind(event.address);
 
-    let rawPlanet = contract.planets(event.params.loc);
-    let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
+    let locationDec = event.params.loc;
+    let rawPlanet = contract.planets(locationDec);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
 
-    let planet = Planet.load(event.params.loc.toHexString());
+    let locationid = locationDecToLocationId(locationDec);
+
+    let planet = Planet.load(locationid);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
 
-    let hat = new Hat(event.params.loc.toHexString())
+    let hat = new Hat(locationid)
     hat.player = planet.owner;
     hat.planet = planet.id;
     hat.hatLevel = planet.hatLevel;
@@ -116,7 +119,8 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
 
     // always exists
     let fromPlanetDec = rawArrival.value2;
-    let fromPlanet = Planet.load(fromPlanetDec.toHexString());
+    let fromPlanetLocationId = locationDecToLocationId(fromPlanetDec);
+    let fromPlanet = Planet.load(fromPlanetLocationId);
     let rawFromPlanet = contract.planets(fromPlanetDec);
     let fromPlanetExtendedInfo = contract.planetsExtendedInfo(fromPlanetDec);
     fromPlanet = refreshPlanetFromContract(fromPlanet, rawFromPlanet, fromPlanetExtendedInfo);
@@ -124,14 +128,15 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
 
     // might not exist for us yet
     let toPlanetDec = rawArrival.value3
-    let toPlanet = Planet.load(toPlanetDec.toHexString());
-    if (toPlanet === null) {
-        toPlanet = new Planet(toPlanetDec.toHexString());
-        toPlanet.locationDec = toPlanetDec;
-    }
+    let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
+    let toPlanet = Planet.load(toPlanetLocationId);
     let rawToPlanet = contract.planets(toPlanetDec);
     let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
-    toPlanet = refreshPlanetFromContract(toPlanet, rawToPlanet, toPlanetExtendedInfo);
+    if (toPlanet === null) {
+        toPlanet = newPlanet(toPlanetDec, rawToPlanet, toPlanetExtendedInfo);
+    } else {
+        toPlanet = refreshPlanetFromContract(toPlanet, rawToPlanet, toPlanetExtendedInfo);
+    }
     toPlanet.save();
 
     let arrival = new Arrival(event.params.arrivalId.toString());
@@ -165,10 +170,11 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
 export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     let contract = Contract.bind(event.address);
 
-    let rawPlanet = contract.planets(event.params.loc);
-    let planetExtendedInfo = contract.planetsExtendedInfo(event.params.loc);
+    let locationDec = event.params.loc;
+    let rawPlanet = contract.planets(locationDec);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
 
-    let planet = Planet.load(event.params.loc.toHexString());
+    let planet = Planet.load(locationDecToLocationId(locationDec));
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     // recalculate silver spent
     planet.silverSpentComputed = calculateSilverSpent(planet);
@@ -304,6 +310,16 @@ function arrive(toPlanetDec: Planet | null, arrival: Arrival | null): Planet | n
     return toPlanetDec;
 }
 
+function newPlanet(locationDec: BigInt, rawPlanet: Contract__planetsResult, planetExtendedInfo: Contract__planetsExtendedInfoResult): Planet | null {
+
+    // todo why
+    let p = new Planet(locationDecToLocationId(locationDec));
+    let planet = refreshPlanetFromContract(p, rawPlanet, planetExtendedInfo);
+    planet.silverSpentComputed = 0;
+    planet.locationDec = locationDec;
+    return planet;
+}
+
 function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__planetsResult, planetExtendedInfo: Contract__planetsExtendedInfoResult): Planet | null {
 
     planet.owner = rawPlanet.value0.toHexString();
@@ -325,7 +341,6 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.speedUpgrades = planetExtendedInfo.value6.toI32();
     planet.defenseUpgrades = planetExtendedInfo.value7.toI32();
     planet.hatLevel = planetExtendedInfo.value8.toI32();
-    planet.silverSpentComputed = 0;
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
     return planet;
@@ -345,4 +360,14 @@ function setup(timestamp: i32): Meta | null {
 
     }
     return meta;
+}
+
+function locationDecToLocationId(locationDec: BigInt): String {
+    // BigInt does not get 0 padded by toHexString plus gets a 0x prefix...
+    let prefixedLocationId = locationDec.toHexString();
+    // strip 0x
+    let planetid = prefixedLocationId.substring(2, prefixedLocationId.length);
+    // pad to 64
+    let locationid = planetid.padStart(64, "0")
+    return locationid;
 }
