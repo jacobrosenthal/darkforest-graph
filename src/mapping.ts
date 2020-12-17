@@ -46,10 +46,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     player.homeWorld = locationDecToLocationId(locationDec);
     player.save();
 
-    let rawPlanet = contract.planets(locationDec);
-    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
-
-    let planet = newPlanet(locationDec, rawPlanet, planetExtendedInfo);
+    let planet = newPlanet(locationDec, contract);
     planet.save();
 }
 
@@ -78,10 +75,8 @@ export function handleBlock(block: ethereum.Block): void {
             let toPlanetDec = rawArrival.value3
             let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
             let toPlanet = Planet.load(toPlanetLocationId);
-            let rawToPlanet = contract.planets(toPlanetDec);
-            let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
             if (toPlanet === null) {
-                toPlanet = newPlanet(toPlanetDec, rawToPlanet, toPlanetExtendedInfo);
+                toPlanet = newPlanet(toPlanetDec, contract);
             }
             toPlanet.save();
 
@@ -201,6 +196,7 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
 }
 
 // todo can I type these to not be null somehow?
+// NOTE REQUIRES planet to have been refreshed before being called
 function calculateSilverSpent(planet: Planet | null): i32 {
     let upgradeState: i32[] = [
         planet.rangeUpgrades,
@@ -321,7 +317,10 @@ function arrive(toPlanetDec: Planet | null, arrival: Arrival | null): Planet | n
     return toPlanetDec;
 }
 
-function newPlanet(locationDec: BigInt, rawPlanet: Contract__planetsResult, planetExtendedInfo: Contract__planetsExtendedInfoResult): Planet | null {
+function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
+
+    let rawPlanet = contract.planets(locationDec);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
 
     // todo why
     let locationId = locationDecToLocationId(locationDec);
@@ -380,7 +379,6 @@ function setup(timestamp: i32): Meta | null {
     }
     return meta;
 }
-
 
 
 // 0 index count chars
