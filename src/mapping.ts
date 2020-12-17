@@ -60,76 +60,9 @@ export function handleBlock(block: ethereum.Block): void {
     // first call setup and global to hold the last timestap we processed
     let meta = setup(current);
 
-    //process unprocessed arrivals
-    let unprocessed = UnprocessedArrivalIdQueue.load(block.timestamp.toString());
-    if (unprocessed !== null) {
+    scheduleArrivalsAndRefresh(block, contract);
 
-        let arrivalIds = unprocessed.arrivalIds;
-        for (let i = 0; i < arrivalIds.length; i++) {
-
-            let arrivalId = arrivalIds[i];
-
-            let rawArrival = contract.planetArrivals(arrivalId);
-
-            //only refresh the toPlanet, and only if the toPlanet is not already in our Planets store
-            let toPlanetDec = rawArrival.value3
-            let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
-            let toPlanet = Planet.load(toPlanetLocationId);
-            if (toPlanet === null) {
-                toPlanet = newPlanet(toPlanetDec, contract);
-            }
-            toPlanet.save();
-
-            let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
-            let arrival = new Arrival(arrivalId.toString());
-            arrival.arrivalId = arrivalId.toI32();
-            // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
-            arrival.player = rawArrival.value1.toHexString();
-            arrival.fromPlanet = fromPlanetLocationId;
-            arrival.toPlanet = toPlanet.id;
-            arrival.popArriving = rawArrival.value4.toI32();
-            arrival.silverMoved = rawArrival.value5.toI32();
-            arrival.departureTime = rawArrival.value6.toI32();
-            arrival.arrivalTime = rawArrival.value7.toI32();
-            arrival.receivedAt = block.timestamp.toI32();
-            arrival.save();
-
-            // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
-            let arrivalTime = arrival.arrivalTime;
-            let pending = PendingArrivalQueue.load(arrivalTime.toString());
-            let arrivals: String[] = [];
-            if (pending === null) {
-                pending = new PendingArrivalQueue(arrivalTime.toString());
-            } else {
-                arrivals = pending.arrivals;
-            }
-            arrivals.push(arrival.id);
-            pending.arrivals = arrivals;
-            pending.save();
-        }
-    }
-
-    // process last+1 up to and including current
-    for (let i = meta.lastProcessed + 1; i <= current; i++) {
-        let bucket = PendingArrivalQueue.load(i.toString());
-        if (bucket !== null) {
-
-            // multiple arrivals are in order of arrivalid
-            let arrivals = bucket.arrivals.map<Arrival | null>(aid => Arrival.load(aid));
-
-            for (let i = 0; i < arrivals.length; i++) {
-
-                let a = arrivals[i];
-
-                let planet = Planet.load(a.toPlanet);
-                planet = arrive(planet, a);
-                planet.save();
-
-                a.processedAt = current;
-                a.save();
-            }
-        }
-    }
+    processArrivals(meta, current, contract);
 
     meta.lastProcessed = current;
     meta.save();
@@ -193,6 +126,83 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     upgrade.planet = planet.id;
     upgrade.timestamp = planet.lastUpdated;
     upgrade.save();
+}
+
+
+function scheduleArrivalsAndRefresh(block: ethereum.Block, contract: Contract): void {
+    //process unprocessed arrivals
+    let unprocessed = UnprocessedArrivalIdQueue.load(block.timestamp.toString());
+    if (unprocessed !== null) {
+
+        let arrivalIds = unprocessed.arrivalIds;
+        for (let i = 0; i < arrivalIds.length; i++) {
+
+            let arrivalId = arrivalIds[i];
+
+            let rawArrival = contract.planetArrivals(arrivalId);
+
+            //only refresh the toPlanet, and only if the toPlanet is not already in our Planets store
+            let toPlanetDec = rawArrival.value3
+            let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
+            let toPlanet = Planet.load(toPlanetLocationId);
+            if (toPlanet === null) {
+                toPlanet = newPlanet(toPlanetDec, contract);
+            }
+            toPlanet.save();
+
+            let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
+            let arrival = new Arrival(arrivalId.toString());
+            arrival.arrivalId = arrivalId.toI32();
+            // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
+            arrival.player = rawArrival.value1.toHexString();
+            arrival.fromPlanet = fromPlanetLocationId;
+            arrival.toPlanet = toPlanet.id;
+            arrival.popArriving = rawArrival.value4.toI32();
+            arrival.silverMoved = rawArrival.value5.toI32();
+            arrival.departureTime = rawArrival.value6.toI32();
+            arrival.arrivalTime = rawArrival.value7.toI32();
+            arrival.receivedAt = block.timestamp.toI32();
+            arrival.save();
+
+            // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
+            let arrivalTime = arrival.arrivalTime;
+            let pending = PendingArrivalQueue.load(arrivalTime.toString());
+            let arrivals: String[] = [];
+            if (pending === null) {
+                pending = new PendingArrivalQueue(arrivalTime.toString());
+            } else {
+                arrivals = pending.arrivals;
+            }
+            arrivals.push(arrival.id);
+            pending.arrivals = arrivals;
+            pending.save();
+        }
+    }
+
+}
+
+function processArrivals(meta: Meta | null, current: i32, contract: Contract): void {
+    // process last+1 up to and including current
+    for (let i = meta.lastProcessed + 1; i <= current; i++) {
+        let bucket = PendingArrivalQueue.load(i.toString());
+        if (bucket !== null) {
+
+            // multiple arrivals are in order of arrivalid
+            let arrivals = bucket.arrivals.map<Arrival | null>(aid => Arrival.load(aid));
+
+            for (let i = 0; i < arrivals.length; i++) {
+
+                let a = arrivals[i];
+
+                let planet = Planet.load(a.toPlanet);
+                planet = arrive(planet, a);
+                planet.save();
+
+                a.processedAt = current;
+                a.save();
+            }
+        }
+    }
 }
 
 // todo can I type these to not be null somehow?
