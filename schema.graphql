@@ -37,12 +37,12 @@ type Planet @entity {
     silverSpentComputed: Int! # Computed cost of applied upgrades
 }
 
-type UnprocessedArrivals @entity  {
+type UnprocessedArrivalIdQueue @entity  {
     id: ID! # blocktime
-    arrivals: [BigInt!]!
+    arrivalIds: [BigInt!]!
 }
 
-type ArrivalsAtInterval @entity  {
+type PendingArrivalQueue @entity  {
     id: ID! # decimal arrivalTime as a string
     arrivals: [Arrival!]!
 }

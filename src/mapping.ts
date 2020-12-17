@@ -8,7 +8,7 @@ import {
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult
 } from "../generated/Contract/Contract";
-import { Arrival, ArrivalsAtInterval, Meta, Player, Planet, UnprocessedArrivals, Hat, Upgrade } from "../generated/schema";
+import { Arrival, PendingArrivalQueue, Meta, Player, Planet, UnprocessedArrivalIdQueue, Hat, Upgrade } from "../generated/schema";
 
 // NOTE: the timestamps within are all unix epoch in seconds NOT MILLISECONDS
 // like in all the JS code where youll see divided by contractPrecision. As a
@@ -61,13 +61,13 @@ export function handleBlock(block: ethereum.Block): void {
     let meta = setup(current);
 
     //process unprocessed arrivals
-    let unprocessedBucket = UnprocessedArrivals.load(block.timestamp.toString());
-    if (unprocessedBucket !== null) {
+    let unprocessed = UnprocessedArrivalIdQueue.load(block.timestamp.toString());
+    if (unprocessed !== null) {
 
-        let unprocessedArrivals = unprocessedBucket.arrivals;
-        for (let i = 0; i < unprocessedArrivals.length; i++) {
+        let arrivalIds = unprocessed.arrivalIds;
+        for (let i = 0; i < arrivalIds.length; i++) {
 
-            let arrivalId = unprocessedArrivals[i];
+            let arrivalId = arrivalIds[i];
 
             let rawArrival = contract.planetArrivals(arrivalId);
 
@@ -95,23 +95,23 @@ export function handleBlock(block: ethereum.Block): void {
             arrival.save();
 
             // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
-            let bucketTime = arrival.arrivalTime;
-            let bucket = ArrivalsAtInterval.load(bucketTime.toString());
+            let arrivalTime = arrival.arrivalTime;
+            let pending = PendingArrivalQueue.load(arrivalTime.toString());
             let arrivals: String[] = [];
-            if (bucket === null) {
-                bucket = new ArrivalsAtInterval(bucketTime.toString());
+            if (pending === null) {
+                pending = new PendingArrivalQueue(arrivalTime.toString());
             } else {
-                arrivals = bucket.arrivals;
+                arrivals = pending.arrivals;
             }
             arrivals.push(arrival.id);
-            bucket.arrivals = arrivals;
-            bucket.save();
+            pending.arrivals = arrivals;
+            pending.save();
         }
     }
 
     // process last+1 up to and including current
     for (let i = meta.lastProcessed + 1; i <= current; i++) {
-        let bucket = ArrivalsAtInterval.load(i.toString());
+        let bucket = PendingArrivalQueue.load(i.toString());
         if (bucket !== null) {
 
             // multiple arrivals are in order of arrivalid
@@ -158,17 +158,17 @@ export function handleBoughtHat(event: BoughtHat): void {
 
 export function handleArrivalQueued(event: ArrivalQueued): void {
     //schedule arrivals to be processed in bulk in handler
-    let bucketTime = event.block.timestamp;
-    let bucket = UnprocessedArrivals.load(bucketTime.toString());
-    let arrivals: BigInt[] = [];
-    if (bucket === null) {
-        bucket = new UnprocessedArrivals(bucketTime.toString());
+    let current = event.block.timestamp;
+    let unprocessed = UnprocessedArrivalIdQueue.load(current.toString());
+    let arrivalIds: BigInt[] = [];
+    if (unprocessed === null) {
+        unprocessed = new UnprocessedArrivalIdQueue(current.toString());
     } else {
-        arrivals = bucket.arrivals;
+        arrivalIds = unprocessed.arrivalIds;
     }
-    arrivals.push(event.params.arrivalId);
-    bucket.arrivals = arrivals;
-    bucket.save();
+    arrivalIds.push(event.params.arrivalId);
+    unprocessed.arrivalIds = arrivalIds;
+    unprocessed.save();
 }
 
 //planet hasHarvestedArtifact new column

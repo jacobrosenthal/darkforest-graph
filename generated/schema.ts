@@ -361,7 +361,7 @@ export class Planet extends Entity {
   }
 }
 
-export class UnprocessedArrivals extends Entity {
+export class UnprocessedArrivalIdQueue extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -369,17 +369,23 @@ export class UnprocessedArrivals extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save UnprocessedArrivals entity without an ID");
+    assert(
+      id !== null,
+      "Cannot save UnprocessedArrivalIdQueue entity without an ID"
+    );
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save UnprocessedArrivals entity with non-string ID. " +
+      "Cannot save UnprocessedArrivalIdQueue entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("UnprocessedArrivals", id.toString(), this);
+    store.set("UnprocessedArrivalIdQueue", id.toString(), this);
   }
 
-  static load(id: string): UnprocessedArrivals | null {
-    return store.get("UnprocessedArrivals", id) as UnprocessedArrivals | null;
+  static load(id: string): UnprocessedArrivalIdQueue | null {
+    return store.get(
+      "UnprocessedArrivalIdQueue",
+      id
+    ) as UnprocessedArrivalIdQueue | null;
   }
 
   get id(): string {
@@ -391,17 +397,17 @@ export class UnprocessedArrivals extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get arrivals(): Array<BigInt> {
-    let value = this.get("arrivals");
+  get arrivalIds(): Array<BigInt> {
+    let value = this.get("arrivalIds");
     return value.toBigIntArray();
   }
 
-  set arrivals(value: Array<BigInt>) {
-    this.set("arrivals", Value.fromBigIntArray(value));
+  set arrivalIds(value: Array<BigInt>) {
+    this.set("arrivalIds", Value.fromBigIntArray(value));
   }
 }
 
-export class ArrivalsAtInterval extends Entity {
+export class PendingArrivalQueue extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -409,17 +415,17 @@ export class ArrivalsAtInterval extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save ArrivalsAtInterval entity without an ID");
+    assert(id !== null, "Cannot save PendingArrivalQueue entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save ArrivalsAtInterval entity with non-string ID. " +
+      "Cannot save PendingArrivalQueue entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("ArrivalsAtInterval", id.toString(), this);
+    store.set("PendingArrivalQueue", id.toString(), this);
   }
 
-  static load(id: string): ArrivalsAtInterval | null {
-    return store.get("ArrivalsAtInterval", id) as ArrivalsAtInterval | null;
+  static load(id: string): PendingArrivalQueue | null {
+    return store.get("PendingArrivalQueue", id) as PendingArrivalQueue | null;
   }
 
   get id(): string {
