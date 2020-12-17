@@ -361,6 +361,46 @@ export class Planet extends Entity {
   }
 }
 
+export class UnprocessedArrivals extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save UnprocessedArrivals entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save UnprocessedArrivals entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("UnprocessedArrivals", id.toString(), this);
+  }
+
+  static load(id: string): UnprocessedArrivals | null {
+    return store.get("UnprocessedArrivals", id) as UnprocessedArrivals | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get arrivals(): Array<BigInt> {
+    let value = this.get("arrivals");
+    return value.toBigIntArray();
+  }
+
+  set arrivals(value: Array<BigInt>) {
+    this.set("arrivals", Value.fromBigIntArray(value));
+  }
+}
+
 export class ArrivalsAtInterval extends Entity {
   constructor(id: string) {
     super();

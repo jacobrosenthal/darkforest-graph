@@ -8,7 +8,7 @@ import {
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult
 } from "../generated/Contract/Contract";
-import { Arrival, ArrivalsAtInterval, Meta, Player, Planet, Hat, Upgrade } from "../generated/schema";
+import { Arrival, ArrivalsAtInterval, Meta, Player, Planet, UnprocessedArrivals, Hat, Upgrade } from "../generated/schema";
 
 // NOTE: the timestamps within are all unix epoch in seconds NOT MILLISECONDS
 // like in all the JS code where youll see divided by contractPrecision. As a
@@ -63,6 +63,57 @@ export function handleBlock(block: ethereum.Block): void {
     // first call setup and global to hold the last timestap we processed
     let meta = setup(current);
 
+    //process unprocessed arrivals
+    let unprocessedBucket = UnprocessedArrivals.load(block.timestamp.toString());
+    if (unprocessedBucket !== null) {
+
+        let unprocessedArrivals = unprocessedBucket.arrivals;
+        for (let i = 0; i < unprocessedArrivals.length; i++) {
+
+            let arrivalId = unprocessedArrivals[i];
+
+            let rawArrival = contract.planetArrivals(arrivalId);
+
+            //only refresh the toPlanet, and only if the toPlanet is not already in our Planets store
+            let toPlanetDec = rawArrival.value3
+            let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
+            let toPlanet = Planet.load(toPlanetLocationId);
+            let rawToPlanet = contract.planets(toPlanetDec);
+            let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
+            if (toPlanet === null) {
+                toPlanet = newPlanet(toPlanetDec, rawToPlanet, toPlanetExtendedInfo);
+            }
+            toPlanet.save();
+
+            let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
+            let arrival = new Arrival(arrivalId.toString());
+            arrival.arrivalId = arrivalId.toI32();
+            // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
+            arrival.player = rawArrival.value1.toHexString();
+            arrival.fromPlanet = fromPlanetLocationId;
+            arrival.toPlanet = toPlanet.id;
+            arrival.popArriving = rawArrival.value4.toI32();
+            arrival.silverMoved = rawArrival.value5.toI32();
+            arrival.departureTime = rawArrival.value6.toI32();
+            arrival.arrivalTime = rawArrival.value7.toI32();
+            arrival.receivedAt = block.timestamp.toI32();
+            arrival.save();
+
+            // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
+            let bucketTime = arrival.arrivalTime;
+            let bucket = ArrivalsAtInterval.load(bucketTime.toString());
+            let arrivals: String[] = [];
+            if (bucket === null) {
+                bucket = new ArrivalsAtInterval(bucketTime.toString());
+            } else {
+                arrivals = bucket.arrivals;
+            }
+            arrivals.push(arrival.id);
+            bucket.arrivals = arrivals;
+            bucket.save();
+        }
+    }
+
     // process last+1 up to and including current
     for (let i = meta.lastProcessed + 1; i <= current; i++) {
         let bucket = ArrivalsAtInterval.load(i.toString());
@@ -111,45 +162,16 @@ export function handleBoughtHat(event: BoughtHat): void {
 }
 
 export function handleArrivalQueued(event: ArrivalQueued): void {
-    let contract = Contract.bind(event.address);
-
-    let rawArrival = contract.planetArrivals(event.params.arrivalId);
-
-    //only refresh the toPlanet, and only if the toPlanet is not already in our Planets store
-    let toPlanetDec = rawArrival.value3
-    let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
-    let toPlanet = Planet.load(toPlanetLocationId);
-    let rawToPlanet = contract.planets(toPlanetDec);
-    let toPlanetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
-    if (toPlanet === null) {
-        toPlanet = newPlanet(toPlanetDec, rawToPlanet, toPlanetExtendedInfo);
-    }
-    toPlanet.save();
-
-    let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
-    let arrival = new Arrival(event.params.arrivalId.toString());
-    arrival.arrivalId = event.params.arrivalId.toI32();
-    // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
-    arrival.player = rawArrival.value1.toHexString();
-    arrival.fromPlanet = fromPlanetLocationId;
-    arrival.toPlanet = toPlanet.id;
-    arrival.popArriving = rawArrival.value4.toI32();
-    arrival.silverMoved = rawArrival.value5.toI32();
-    arrival.departureTime = rawArrival.value6.toI32();
-    arrival.arrivalTime = rawArrival.value7.toI32();
-    arrival.receivedAt = event.block.timestamp.toI32();
-    arrival.save();
-
-    // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
-    let bucketTime = arrival.arrivalTime;
-    let bucket = ArrivalsAtInterval.load(bucketTime.toString());
-    let arrivals: String[] = [];
+    //schedule arrivals to be processed in bulk in handler
+    let bucketTime = event.block.timestamp;
+    let bucket = UnprocessedArrivals.load(bucketTime.toString());
+    let arrivals: BigInt[] = [];
     if (bucket === null) {
-        bucket = new ArrivalsAtInterval(bucketTime.toString());
+        bucket = new UnprocessedArrivals(bucketTime.toString());
     } else {
         arrivals = bucket.arrivals;
     }
-    arrivals.push(arrival.id);
+    arrivals.push(event.params.arrivalId);
     bucket.arrivals = arrivals;
     bucket.save();
 }
