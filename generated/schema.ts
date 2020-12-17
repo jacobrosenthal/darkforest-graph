@@ -279,6 +279,51 @@ export class Planet extends Entity {
     this.set("defenseUpgrades", Value.fromI32(value));
   }
 
+  get isPopulationCapBoosted(): boolean {
+    let value = this.get("isPopulationCapBoosted");
+    return value.toBoolean();
+  }
+
+  set isPopulationCapBoosted(value: boolean) {
+    this.set("isPopulationCapBoosted", Value.fromBoolean(value));
+  }
+
+  get isPopulationGrowthBoosted(): boolean {
+    let value = this.get("isPopulationGrowthBoosted");
+    return value.toBoolean();
+  }
+
+  set isPopulationGrowthBoosted(value: boolean) {
+    this.set("isPopulationGrowthBoosted", Value.fromBoolean(value));
+  }
+
+  get isRangeBoosted(): boolean {
+    let value = this.get("isRangeBoosted");
+    return value.toBoolean();
+  }
+
+  set isRangeBoosted(value: boolean) {
+    this.set("isRangeBoosted", Value.fromBoolean(value));
+  }
+
+  get isSpeedBoosted(): boolean {
+    let value = this.get("isSpeedBoosted");
+    return value.toBoolean();
+  }
+
+  set isSpeedBoosted(value: boolean) {
+    this.set("isSpeedBoosted", Value.fromBoolean(value));
+  }
+
+  get isDefenseBoosted(): boolean {
+    let value = this.get("isDefenseBoosted");
+    return value.toBoolean();
+  }
+
+  set isDefenseBoosted(value: boolean) {
+    this.set("isDefenseBoosted", Value.fromBoolean(value));
+  }
+
   get hatLevel(): i32 {
     let value = this.get("hatLevel");
     return value.toI32();

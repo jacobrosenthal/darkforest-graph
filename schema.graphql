@@ -26,6 +26,11 @@ type Planet @entity {
     rangeUpgrades: Int!
     speedUpgrades: Int!
     defenseUpgrades: Int!
+    isPopulationCapBoosted: Boolean!
+    isPopulationGrowthBoosted: Boolean!
+    isRangeBoosted: Boolean!
+    isSpeedBoosted: Boolean!
+    isDefenseBoosted: Boolean!
     hatLevel: Int!
     planetResource: PlanetResource!
     spaceType: SpaceType!
