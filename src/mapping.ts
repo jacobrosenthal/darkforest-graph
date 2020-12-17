@@ -18,8 +18,6 @@ import { Arrival, ArrivalsAtInterval, Meta, Player, Planet, Hat, Upgrade } from 
 // the contract asap where possible. However due to overflows we cast variables
 // to f64 during calculations then back to i32 at the end avoid overflows.
 
-// NOTE toHexString() doesnt 0 pad any of our strings currently
-
 function toSpaceType(spaceType: string): string {
     if (spaceType == "0") {
         return "NEBULA";
@@ -42,7 +40,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     let contract = Contract.bind(event.address);
     let locationDec = event.params.loc;
 
-    // todo 0 pad??
+    // params.player is an address which gets 0x prefixed and 0 padded in toHexString
     let player = new Player(event.params.player.toHexString());
     player.initTimestamp = event.block.timestamp.toI32();
     player.homeWorld = locationDecToLocationId(locationDec);
@@ -141,6 +139,7 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
 
     let arrival = new Arrival(event.params.arrivalId.toString());
     arrival.arrivalId = event.params.arrivalId.toI32();
+    // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
     arrival.player = rawArrival.value1.toHexString();
     arrival.fromPlanet = fromPlanet.id;
     arrival.toPlanet = toPlanet.id;
@@ -328,6 +327,7 @@ function newPlanet(locationDec: BigInt, rawPlanet: Contract__planetsResult, plan
 
 function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__planetsResult, planetExtendedInfo: Contract__planetsExtendedInfoResult): Planet | null {
 
+    // rawPlanet.value0 is an address which gets 0x prefixed and 0 padded in toHexString
     planet.owner = rawPlanet.value0.toHexString();
     planet.isInitialized = planetExtendedInfo.value0;
     planet.createdAt = planetExtendedInfo.value1.toI32();
@@ -360,6 +360,7 @@ function setup(timestamp: i32): Meta | null {
         meta = new Meta("0");
         meta.lastProcessed = timestamp;
 
+        // careful, player addresses need to be 0x prefixed and 0 padded
         let player = new Player("0x0000000000000000000000000000000000000000");
         player.initTimestamp = timestamp;
         player.save();

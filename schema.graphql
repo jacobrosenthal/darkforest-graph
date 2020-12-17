@@ -1,13 +1,13 @@
 type Player @entity {
-    id: ID! # 0x prefixed hex string
+    id: ID! # 0x prefixed hex string, zero padded
     initTimestamp: Int!
     homeWorld: Planet # allows null because 0x0000000000000000000000000000000000000000 has no homeWorld
     planets: [Planet!]! @derivedFrom(field: "owner")
 }
 
 type Planet @entity {
-    id: ID! # locationid 0x prefixed hex string
-    locationDec: BigInt! # loc decimal version of locationid
+    id: ID! # 0 padded hex version of locationDec, no 0x prefix
+    locationDec: BigInt! # locationDec version of locationid
     owner: Player!
     isInitialized: Boolean!
     createdAt: Int!
@@ -38,7 +38,7 @@ type Planet @entity {
 }
 
 type ArrivalsAtInterval @entity  {
-    id: ID!
+    id: ID! # decimal arrivalTime as a string
     arrivals: [Arrival!]!
 }
 
@@ -48,7 +48,7 @@ type Meta @entity  {
 }
 
 type Arrival @entity {
-    id: ID!
+    id: ID! # decimal arrivalid as a string
     arrivalId: Int! # same as id, but sortable because its an int
     player: Player!
     fromPlanet: Planet!
@@ -62,16 +62,16 @@ type Arrival @entity {
 }
 
 type Hat @entity {
-    id: ID!
-    planet: Planet! # same as id, but sortable because its an int
+    id: ID! # 0 padded hex version of locationDec, no 0x prefix
+    planet: Planet! # same as id, but linked to planets entity
     player: Player!
     hatLevel: Int
     timestamp: Int
 }
 
 type Upgrade @entity {
-    id: ID!
-    planet: Planet! # same as id, but sortable because its an int
+    id: ID! # 0 padded hex version of locationDec, no 0x prefix
+    planet: Planet! # same as id, but linked to planets entity
     player: Player!
     timestamp: Int
 }
