@@ -361,7 +361,7 @@ export class Planet extends Entity {
   }
 }
 
-export class UnprocessedArrivalIdQueue extends Entity {
+export class DepartureQueue extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -369,23 +369,17 @@ export class UnprocessedArrivalIdQueue extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(
-      id !== null,
-      "Cannot save UnprocessedArrivalIdQueue entity without an ID"
-    );
+    assert(id !== null, "Cannot save DepartureQueue entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save UnprocessedArrivalIdQueue entity with non-string ID. " +
+      "Cannot save DepartureQueue entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("UnprocessedArrivalIdQueue", id.toString(), this);
+    store.set("DepartureQueue", id.toString(), this);
   }
 
-  static load(id: string): UnprocessedArrivalIdQueue | null {
-    return store.get(
-      "UnprocessedArrivalIdQueue",
-      id
-    ) as UnprocessedArrivalIdQueue | null;
+  static load(id: string): DepartureQueue | null {
+    return store.get("DepartureQueue", id) as DepartureQueue | null;
   }
 
   get id(): string {
@@ -407,7 +401,7 @@ export class UnprocessedArrivalIdQueue extends Entity {
   }
 }
 
-export class PendingArrivalQueue extends Entity {
+export class ArrivalQueue extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -415,17 +409,17 @@ export class PendingArrivalQueue extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save PendingArrivalQueue entity without an ID");
+    assert(id !== null, "Cannot save ArrivalQueue entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save PendingArrivalQueue entity with non-string ID. " +
+      "Cannot save ArrivalQueue entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("PendingArrivalQueue", id.toString(), this);
+    store.set("ArrivalQueue", id.toString(), this);
   }
 
-  static load(id: string): PendingArrivalQueue | null {
-    return store.get("PendingArrivalQueue", id) as PendingArrivalQueue | null;
+  static load(id: string): ArrivalQueue | null {
+    return store.get("ArrivalQueue", id) as ArrivalQueue | null;
   }
 
   get id(): string {

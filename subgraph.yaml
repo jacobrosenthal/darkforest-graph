@@ -24,6 +24,10 @@ dataSources:
               - name: Contract
                 file: ./abis/Contract.json
           eventHandlers:
+              - event: PlanetDelegated(uint256,address)
+                handler: handlePlanetDelegated
+              - event: PlanetUndelegated(uint256,address)
+                handler: handlePlanetUndelegated
               - event: PlanetUpgraded(uint256)
                 handler: handlePlanetUpgraded
               - event: BoughtHat(uint256)
