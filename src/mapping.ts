@@ -141,14 +141,8 @@ function scheduleArrivalsAndRefresh(current: i32, contract: Contract): void {
 
             let rawArrival = contract.planetArrivals(arrivalId);
 
-            //only refresh the toPlanet, and only if the toPlanet is not already in our Planets store
             let toPlanetDec = rawArrival.value3
             let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
-            let toPlanet = Planet.load(toPlanetLocationId);
-            if (toPlanet === null) {
-                toPlanet = newPlanet(toPlanetDec, contract);
-            }
-            toPlanet.save();
 
             let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
             let arrival = new Arrival(arrivalId.toString());
@@ -156,16 +150,30 @@ function scheduleArrivalsAndRefresh(current: i32, contract: Contract): void {
             // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
             arrival.player = rawArrival.value1.toHexString();
             arrival.fromPlanet = fromPlanetLocationId;
-            arrival.toPlanet = toPlanet.id;
+            arrival.toPlanet = toPlanetLocationId;
             arrival.popArriving = rawArrival.value4.toI32();
             arrival.silverMoved = rawArrival.value5.toI32();
             arrival.departureTime = rawArrival.value6.toI32();
             arrival.arrivalTime = rawArrival.value7.toI32();
             arrival.receivedAt = current;
 
+
+            let toPlanet = Planet.load(toPlanetLocationId);
+            let madeToPlanet = false;
+            //had to make a new planet which refreshed it
+            if (toPlanet === null) {
+                toPlanet = newPlanet(toPlanetDec, contract);
+                madeToPlanet = true;
+            }
+
             let arrivalTime = arrival.arrivalTime;
-            //contract applied it for us, just mark as processed
-            if (arrivalTime <= current) {
+            // contract applied arrival for us, but we didnt make the planet so refresh to update it
+            if (arrivalTime <= current && !madeToPlanet) {
+
+                let rawPlanet = contract.planets(toPlanetDec);
+                let planetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
+
+                toPlanet = refreshPlanetFromContract(toPlanet, rawPlanet, planetExtendedInfo);
                 arrival.processedAt = current;
             }
             // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
@@ -184,6 +192,7 @@ function scheduleArrivalsAndRefresh(current: i32, contract: Contract): void {
 
             }
 
+            toPlanet.save();
             arrival.save();
         }
     }
