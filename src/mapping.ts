@@ -212,9 +212,13 @@ function processArrivals(meta: Meta | null, current: i32, contract: Contract): v
 
                 let a = arrivals[i];
 
-                let planet = Planet.load(a.toPlanet);
-                planet = arrive(planet, a);
-                planet.save();
+                let toPlanet = Planet.load(a.toPlanet);
+                toPlanet = arrive(toPlanet, a);
+                toPlanet.save();
+
+                let fromPlanet = Planet.load(a.toPlanet);
+                fromPlanet = updatePlanetToTime(fromPlanet, current);
+                fromPlanet.save();
 
                 a.processedAt = current;
                 a.save();
