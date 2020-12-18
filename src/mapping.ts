@@ -134,46 +134,53 @@ function scheduleArrivalsAndRefresh(current: i32, contract: Contract): void {
     let unprocessed = UnprocessedArrivalIdQueue.load(current.toString());
     if (unprocessed !== null) {
 
+        let compactArrivals = contract.bulkGetCompactArrivalsByIds(unprocessed.arrivalIds);
         let arrivalIds = unprocessed.arrivalIds;
-        for (let i = 0; i < arrivalIds.length; i++) {
 
+        for (let i = 0; i < unprocessed.arrivalIds.length; i++) {
+
+            let compactArrival = compactArrivals[i];
             let arrivalId = arrivalIds[i];
 
-            let rawArrival = contract.planetArrivals(arrivalId);
-
-            let toPlanetDec = rawArrival.value3
+            let toPlanetDec = compactArrival.toPlanet;
             let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
+            let fromPlanetLocationId = locationDecToLocationId(compactArrival.fromPlanet);
 
-            let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
             let arrival = new Arrival(arrivalId.toString());
             arrival.arrivalId = arrivalId.toI32();
             // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
-            arrival.player = rawArrival.value1.toHexString();
+            arrival.player = compactArrival.fromPlanetOwner.toHexString();
             arrival.fromPlanet = fromPlanetLocationId;
             arrival.toPlanet = toPlanetLocationId;
-            arrival.popArriving = rawArrival.value4.toI32();
-            arrival.silverMoved = rawArrival.value5.toI32();
-            arrival.departureTime = rawArrival.value6.toI32();
-            arrival.arrivalTime = rawArrival.value7.toI32();
+            arrival.popArriving = compactArrival.popArriving.toI32();
+            arrival.silverMoved = compactArrival.silverMoved.toI32();
+            arrival.departureTime = compactArrival.departureTime.toI32();
+            arrival.arrivalTime = compactArrival.arrivalTime.toI32();
             arrival.receivedAt = current;
 
+            // or mini refresh
+            let fromPlanet = Planet.load(fromPlanetLocationId);
+            fromPlanet.populationLazy = compactArrival.fromPlanetPopulation.toI32();
+            fromPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
+            fromPlanet.owner = compactArrival.fromPlanetOwner.toHexString();
 
             let toPlanet = Planet.load(toPlanetLocationId);
-            let madeToPlanet = false;
-            //had to make a new planet which refreshed it
+            // had to make a new planet which refreshed it
             if (toPlanet === null) {
+                // todo this is the most costly path and could use
+                // contract.bulkGetPlanetsByIds on the off chance several of the
+                // planets need to be newed up costing another contract call per loop
                 toPlanet = newPlanet(toPlanetDec, contract);
-                madeToPlanet = true;
+            } else {
+                // or mini refresh
+                toPlanet.populationLazy = compactArrival.toPlanetPopulation.toI32();
+                toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
+                toPlanet.owner = compactArrival.toPlanetOwner.toHexString();
             }
 
             let arrivalTime = arrival.arrivalTime;
-            // contract applied arrival for us, but we didnt make the planet so refresh to update it
-            if (arrivalTime <= current && !madeToPlanet) {
-
-                let rawPlanet = contract.planets(toPlanetDec);
-                let planetExtendedInfo = contract.planetsExtendedInfo(toPlanetDec);
-
-                toPlanet = refreshPlanetFromContract(toPlanet, rawPlanet, planetExtendedInfo);
+            // contract applied arrival for us so just mark as done
+            if (arrivalTime <= current) {
                 arrival.processedAt = current;
             }
             // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
@@ -189,14 +196,13 @@ function scheduleArrivalsAndRefresh(current: i32, contract: Contract): void {
                 arrivals.push(arrival.id);
                 pending.arrivals = arrivals;
                 pending.save();
-
             }
 
             toPlanet.save();
+            fromPlanet.save();
             arrival.save();
         }
     }
-
 }
 
 function processArrivals(meta: Meta | null, current: i32, contract: Contract): void {
