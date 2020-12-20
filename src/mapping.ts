@@ -5,7 +5,6 @@ import {
     PlanetUpgraded,
     PlayerInitialized,
     BoughtHat,
-    Contract__bulkGetPlanetsByIdsResultRetStruct,
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult,
     PlanetDelegated
@@ -171,39 +170,39 @@ function processDepartures(current: i32, contract: Contract): void {
     let departures = DepartureQueue.load(current.toString());
     if (departures !== null) {
 
-        let compactArrivals = contract.bulkGetCompactArrivalsByIds(departures.arrivalIds);
+
         let arrivalIds = departures.arrivalIds;
-
-        let arrivals: Arrival[] = [];
-
         for (let i = 0; i < arrivalIds.length; i++) {
 
             let arrivalId = arrivalIds[i];
-            let compactArrival = compactArrivals[i];
 
-            let toPlanetLocationId = locationDecToLocationId(compactArrival.toPlanet);
-            let fromPlanetLocationId = locationDecToLocationId(compactArrival.fromPlanet);
+            let rawArrival = contract.planetArrivals(arrivalId);
+
+            let toPlanetDec = rawArrival.value3
+            let fromPlanetDec = rawArrival.value2
+            let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
+            let fromPlanetLocationId = locationDecToLocationId(fromPlanetDec);
 
             let arrival = new Arrival(arrivalId.toString());
             arrival.arrivalId = arrivalId.toI32();
             // addresses gets 0x prefixed and 0 padded in toHexString
-            arrival.player = compactArrival.fromPlanetOwner.toHexString();
+            arrival.player = rawArrival.value1.toHexString();
             arrival.fromPlanet = fromPlanetLocationId;
             arrival.toPlanet = toPlanetLocationId;
-            arrival.popArriving = compactArrival.popArriving.toI32();
-            arrival.silverMoved = compactArrival.silverMoved.toI32();
-            arrival.departureTime = compactArrival.departureTime.toI32();
-            arrival.arrivalTime = compactArrival.arrivalTime.toI32();
+            arrival.popArriving = rawArrival.value4.toI32();
+            arrival.silverMoved = rawArrival.value5.toI32();
+            arrival.departureTime = rawArrival.value6.toI32();
+            arrival.arrivalTime = rawArrival.value7.toI32();
             arrival.receivedAt = current;
-            arrivals.push(arrival);
             // careful, we havent saved them to the store yet
 
             // heres our fromplanet mini refresh
+            let rawFromPlanet = contract.planets(fromPlanetDec);
             let fromPlanet = Planet.load(fromPlanetLocationId);
             // addresses gets 0x prefixed and 0 padded in toHexString
-            fromPlanet.owner = compactArrival.fromPlanetOwner.toHexString();
-            fromPlanet.populationLazy = compactArrival.fromPlanetPopulation.toI32();
-            fromPlanet.silverLazy = compactArrival.fromPlanetSilver.toI32();
+            fromPlanet.owner = rawFromPlanet.value0.toHexString();
+            fromPlanet.populationLazy = rawFromPlanet.value4.toI32();
+            fromPlanet.silverLazy = rawFromPlanet.value10.toI32();
             fromPlanet.lastUpdated = current;
             fromPlanet.save();
 
@@ -213,20 +212,21 @@ function processDepartures(current: i32, contract: Contract): void {
                 // todo this is the most costly path as its called in a loop.
                 // also happens constantly in the game..
                 // ideally detect and use contract.bulkGetPlanetsByIds
-                toPlanet = newPlanet(compactArrival.toPlanet, contract)
+                toPlanet = newPlanet(toPlanetDec, contract)
             } else {
+
+                let rawToPlanet = contract.planets(toPlanetDec);
 
                 // or get a mini refresh
                 // addresses gets 0x prefixed and 0 padded in toHexString
-                toPlanet.owner = compactArrival.toPlanetOwner.toHexString();
-                toPlanet.populationLazy = compactArrival.toPlanetPopulation.toI32();
-                toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
+                toPlanet.owner = rawToPlanet.value0.toHexString();
+                toPlanet.populationLazy = rawToPlanet.value4.toI32();
+                toPlanet.silverLazy = rawToPlanet.value10.toI32();
                 toPlanet.lastUpdated = current;
             }
             toPlanet.save();
 
-
-            let arrivalTime = compactArrival.arrivalTime.toI32();
+            let arrivalTime = arrival.arrivalTime;
             // contract applied arrival for us?
             if (arrivalTime <= current) {
                 arrival.processedAt = current;
