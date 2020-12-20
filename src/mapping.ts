@@ -42,7 +42,7 @@ function toPlanetResource(planetResource: string): string {
     }
 }
 
-// Note i could miniRefreshPlanetFromContract to save a call, but these get
+// Note i could mini refresh to save a call, but these get
 // called like never
 export function handlePlanetDelegated(event: PlanetDelegated): void {
     let contract = Contract.bind(event.address);
@@ -57,7 +57,7 @@ export function handlePlanetDelegated(event: PlanetDelegated): void {
     planet.save();
 }
 
-// Note i could miniRefreshPlanetFromContract to save a call, but these get
+// Note i could mini refresh to save a call, but these get
 // called like never
 export function handlePlanetUnDelegated(event: PlanetDelegated): void {
     let contract = Contract.bind(event.address);
@@ -76,7 +76,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     let contract = Contract.bind(event.address);
     let locationDec = event.params.loc;
 
-    // params.player is an address which gets 0x prefixed and 0 padded in toHexString
+    // addresses gets 0x prefixed and 0 padded in toHexString
     let player = new Player(event.params.player.toHexString());
     player.initTimestamp = event.block.timestamp.toI32();
     player.homeWorld = locationDecToLocationId(locationDec);
@@ -104,8 +104,8 @@ export function handleBlock(block: ethereum.Block): void {
     meta.save();
 }
 
-// Sadly I can't use miniRefreshPlanetFromContract to save a call as I need the
-// upgrdes from the planetExtendedInfo
+// Sadly I can't use mini refresh to save a call as I need the upgrades from the
+// planetExtendedInfo
 export function handleBoughtHat(event: BoughtHat): void {
     let contract = Contract.bind(event.address);
 
@@ -142,8 +142,8 @@ export function handleArrivalQueued(event: ArrivalQueued): void {
     departures.save();
 }
 
-// Sadly I can't use miniRefreshPlanetFromContract to save a call as I need the
-// upgrdes from the planetExtendedInfo
+// Sadly I can't use mini refresh to save a call as I need the upgrades from the
+// planetExtendedInfo
 export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     let contract = Contract.bind(event.address);
 
@@ -166,62 +166,67 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     upgrade.save();
 }
 
-
 function processDepartures(current: i32, contract: Contract): void {
 
     let departures = DepartureQueue.load(current.toString());
     if (departures !== null) {
 
+        let compactArrivals = contract.bulkGetCompactArrivalsByIds(departures.arrivalIds);
         let arrivalIds = departures.arrivalIds;
-        let toFromPlanetIdPairs: BigInt[] = [];
+
         let arrivals: Arrival[] = [];
 
         for (let i = 0; i < arrivalIds.length; i++) {
 
             let arrivalId = arrivalIds[i];
+            let compactArrival = compactArrivals[i];
 
-            let rawArrival = contract.planetArrivals(arrivalId);
-
-            let toPlanetLocationId = locationDecToLocationId(rawArrival.value3);
-            let fromPlanetLocationId = locationDecToLocationId(rawArrival.value2);
-            toFromPlanetIdPairs.push(rawArrival.value3);
-            toFromPlanetIdPairs.push(rawArrival.value2);
+            let toPlanetLocationId = locationDecToLocationId(compactArrival.toPlanet);
+            let fromPlanetLocationId = locationDecToLocationId(compactArrival.fromPlanet);
 
             let arrival = new Arrival(arrivalId.toString());
             arrival.arrivalId = arrivalId.toI32();
-            // rawArrival.value1 is an address which gets 0x prefixed and 0 padded in toHexString
-            arrival.player = rawArrival.value1.toHexString();
+            // addresses gets 0x prefixed and 0 padded in toHexString
+            arrival.player = compactArrival.fromPlanetOwner.toHexString();
             arrival.fromPlanet = fromPlanetLocationId;
             arrival.toPlanet = toPlanetLocationId;
-            arrival.popArriving = rawArrival.value4.toI32();
-            arrival.silverMoved = rawArrival.value5.toI32();
-            arrival.departureTime = rawArrival.value6.toI32();
-            arrival.arrivalTime = rawArrival.value7.toI32();
+            arrival.popArriving = compactArrival.popArriving.toI32();
+            arrival.silverMoved = compactArrival.silverMoved.toI32();
+            arrival.departureTime = compactArrival.departureTime.toI32();
+            arrival.arrivalTime = compactArrival.arrivalTime.toI32();
             arrival.receivedAt = current;
             arrivals.push(arrival);
-            //careful, we havent saved them to the store yet
-        }
+            // careful, we havent saved them to the store yet
 
-        let toFromRawPlanets = contract.bulkGetPlanetsByIds(toFromPlanetIdPairs);
+            // heres our fromplanet mini refresh
+            let fromPlanet = Planet.load(fromPlanetLocationId);
+            // addresses gets 0x prefixed and 0 padded in toHexString
+            fromPlanet.owner = compactArrival.fromPlanetOwner.toHexString();
+            fromPlanet.populationLazy = compactArrival.fromPlanetPopulation.toI32();
+            fromPlanet.silverLazy = compactArrival.fromPlanetSilver.toI32();
+            fromPlanet.lastUpdated = current;
+            fromPlanet.save();
 
-        for (let i = 0; i < arrivals.length; i++) {
-
-            let arrival = arrivals[i];
-            let rawToPlanet = toFromRawPlanets[i];
-
-            let toPlanet = Planet.load(arrival.toPlanet);
-            let madeToPlanet = false;
+            let toPlanet = Planet.load(toPlanetLocationId);
             // had to make a new planet which refreshed it
             if (toPlanet === null) {
-                // todo ideally this makes its way into bulk somehow
-                let toPlanetLocationDec = BigInt.fromI32(parseInt(arrival.toPlanet) as i32);
-                let planetExtendedInfo = contract.planetsExtendedInfo(toPlanetLocationDec);
-                toPlanet = newPlanetFromRaw(toPlanetLocationDec, rawToPlanet, planetExtendedInfo)
+                // todo this is the most costly path as its called in a loop.
+                // also happens constantly in the game..
+                // ideally detect and use contract.bulkGetPlanetsByIds
+                toPlanet = newPlanet(compactArrival.toPlanet, contract)
             } else {
-                toPlanet = miniRefreshPlanetFromContract(toPlanet, rawToPlanet, current);
-            }
 
-            let arrivalTime = arrival.arrivalTime;
+                // or get a mini refresh
+                // addresses gets 0x prefixed and 0 padded in toHexString
+                toPlanet.owner = compactArrival.toPlanetOwner.toHexString();
+                toPlanet.populationLazy = compactArrival.toPlanetPopulation.toI32();
+                toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
+                toPlanet.lastUpdated = current;
+            }
+            toPlanet.save();
+
+
+            let arrivalTime = compactArrival.arrivalTime.toI32();
             // contract applied arrival for us?
             if (arrivalTime <= current) {
                 arrival.processedAt = current;
@@ -240,14 +245,9 @@ function processDepartures(current: i32, contract: Contract): void {
                 pending.save();
             }
 
-            let rawFromPlanet = toFromRawPlanets[i + 1];
-            let fromPlanet = Planet.load(arrival.fromPlanet);
-            fromPlanet = miniRefreshPlanetFromContract(fromPlanet, rawFromPlanet, current)
-
-            toPlanet.save();
-            fromPlanet.save()
-            arrival.save()
+            arrival.save();
         }
+
     }
 }
 
@@ -347,12 +347,6 @@ function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
 }
 
 function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null {
-    // todo hardcoded game endtime 
-    // let safeEndS = Math.min(atTimeS, 1609372800) as i32;
-    // if (safeEndS < planet.lastUpdated) {
-    //     // console.error('tried to update planet to a past time');
-    //     return planet;
-    // }
     planet.silverLazy = getSilverOverTime(
         planet,
         planet.lastUpdated,
@@ -405,7 +399,7 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
 
     let planet = new Planet(locationId);
 
-    // rawPlanet.value0 is an address which gets 0x prefixed and 0 padded in toHexString
+    // addresses gets 0x prefixed and 0 padded in toHexString
     planet.owner = rawPlanet.value0.toHexString();
     planet.isInitialized = planetExtendedInfo.value0;
     planet.createdAt = planetExtendedInfo.value1.toI32();
@@ -439,63 +433,9 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     return planet;
 }
 
-
-function newPlanetFromRaw(locationDec: BigInt, rawPlanet: Contract__bulkGetPlanetsByIdsResultRetStruct, planetExtendedInfo: Contract__planetsExtendedInfoResult): Planet | null {
-
-    let locationId = locationDecToLocationId(locationDec);
-
-    let planet = new Planet(locationId);
-    // rawPlanet.value0 is an address which gets 0x prefixed and 0 padded in toHexString
-    planet.owner = rawPlanet.owner.toHexString();
-    planet.isInitialized = planetExtendedInfo.value0;
-    planet.createdAt = planetExtendedInfo.value1.toI32();
-    planet.lastUpdated = planetExtendedInfo.value2.toI32();
-    planet.perlin = planetExtendedInfo.value3.toI32();
-    planet.range = rawPlanet.range.toI32();
-    planet.speed = rawPlanet.speed.toI32();
-    planet.defense = rawPlanet.defense.toI32();
-    planet.populationLazy = rawPlanet.population.toI32();
-    planet.populationCap = rawPlanet.populationCap.toI32();
-    planet.populationGrowth = rawPlanet.populationGrowth.toI32();
-    planet.silverCap = rawPlanet.silverCap.toI32();
-    planet.silverGrowth = rawPlanet.silverGrowth.toI32();
-    planet.silverLazy = rawPlanet.silver.toI32();
-    planet.planetLevel = rawPlanet.planetLevel.toI32();
-    planet.rangeUpgrades = planetExtendedInfo.value5.toI32();
-    planet.speedUpgrades = planetExtendedInfo.value6.toI32();
-    planet.defenseUpgrades = planetExtendedInfo.value7.toI32();
-    planet.hatLevel = planetExtendedInfo.value8.toI32();
-    planet.planetResource = toPlanetResource(BigInt.fromI32(rawPlanet.planetResource).toString());
-    planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
-
-    //localstuff
-    planet.silverSpentComputed = 0;
-    planet.locationDec = locationDec;
-    planet.isPopulationCapBoosted = isPopCapBoost(locationId);
-    planet.isPopulationGrowthBoosted = isPopGroBoost(locationId);
-    planet.isRangeBoosted = isRangeBoost(locationId);
-    planet.isSpeedBoosted = isSpeedBoost(locationId);
-    planet.isDefenseBoosted = isDefBoost(locationId);
-    return planet;
-}
-
-// saves a call to planetExtendedInfo for cases when we KNOW the contract did an
-// energy refresh. Thus we can use the planets energy numbers, and use current
-// as planetExtendedInfo.lastUpdated
-function miniRefreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__bulkGetPlanetsByIdsResultRetStruct, current: i32): Planet | null {
-
-    // rawPlanet.value0 is an address which gets 0x prefixed and 0 padded in toHexString
-    planet.owner = rawPlanet.owner.toHexString();
-    planet.populationLazy = rawPlanet.population.toI32();
-    planet.silverLazy = rawPlanet.silver.toI32();
-    planet.lastUpdated = current;
-
-    return planet;
-}
-
 function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__planetsResult, planetExtendedInfo: Contract__planetsExtendedInfoResult): Planet | null {
 
-    // rawPlanet.value0 is an address which gets 0x prefixed and 0 padded in toHexString
+    // addresses gets 0x prefixed and 0 padded in toHexString
     planet.owner = rawPlanet.value0.toHexString();
     planet.isInitialized = planetExtendedInfo.value0;
     planet.createdAt = planetExtendedInfo.value1.toI32();
