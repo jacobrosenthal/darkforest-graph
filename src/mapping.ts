@@ -357,38 +357,38 @@ function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null 
     return planet;
 }
 
-function arrive(toPlanetDec: Planet | null, arrival: Arrival | null): Planet | null {
+function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null {
 
-    // update toPlanetDec energy and silver right before arrival
-    toPlanetDec = updatePlanetToTime(toPlanetDec, arrival.arrivalTime);
+    // update toPlanet energy and silver right before arrival
+    toPlanet = updatePlanetToTime(toPlanet, arrival.arrivalTime);
 
     // apply energy
     let shipsMoved = arrival.popArriving;
 
-    if (arrival.player !== toPlanetDec.owner) {
+    if (arrival.player !== toPlanet.owner) {
         // attacking enemy - includes emptyAddress
 
-        if (toPlanetDec.populationLazy > Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32) {
+        if (toPlanet.populationLazy > Math.floor((shipsMoved * 100) / toPlanet.defense) as i32) {
             // attack reduces target planet's garrison but doesn't conquer it
-            toPlanetDec.populationLazy -= Math.floor((shipsMoved * 100) / toPlanetDec.defense) as i32;
+            toPlanet.populationLazy -= Math.floor((shipsMoved * 100) / toPlanet.defense) as i32;
         } else {
             // conquers planet
-            toPlanetDec.owner = arrival.player;
-            toPlanetDec.populationLazy = shipsMoved - Math.floor((toPlanetDec.populationLazy * toPlanetDec.defense) / 100) as i32;
+            toPlanet.owner = arrival.player;
+            toPlanet.populationLazy = shipsMoved - Math.floor((toPlanet.populationLazy * toPlanet.defense) / 100) as i32;
         }
     } else {
         // moving between my own planets
-        toPlanetDec.populationLazy += shipsMoved;
+        toPlanet.populationLazy += shipsMoved;
     }
 
     // apply silver
-    if (toPlanetDec.silverLazy + arrival.silverMoved > toPlanetDec.silverCap) {
-        toPlanetDec.silverLazy = toPlanetDec.silverCap;
+    if (toPlanet.silverLazy + arrival.silverMoved > toPlanet.silverCap) {
+        toPlanet.silverLazy = toPlanet.silverCap;
     } else {
-        toPlanetDec.silverLazy += arrival.silverMoved;
+        toPlanet.silverLazy += arrival.silverMoved;
     }
 
-    return toPlanetDec;
+    return toPlanet;
 }
 
 function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
