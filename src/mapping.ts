@@ -7,7 +7,6 @@ import {
     BoughtHat,
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult,
-    PlanetDelegated
 } from "../generated/Contract/Contract";
 import { Arrival, ArrivalQueue, Meta, Player, Planet, DepartureQueue, Hat, Upgrade } from "../generated/schema";
 
@@ -39,36 +38,6 @@ function toPlanetResource(planetResource: string): string {
     } else {
         return "SILVER";
     }
-}
-
-// Note i could mini refresh to save a call, but these get
-// called like never
-export function handlePlanetDelegated(event: PlanetDelegated): void {
-    let contract = Contract.bind(event.address);
-
-    let locationDec = event.params.loc;
-    let rawPlanet = contract.planets(locationDec);
-    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
-
-    let locationId = locationDecToLocationId(locationDec);
-    let planet = Planet.load(locationId);
-    planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
-    planet.save();
-}
-
-// Note i could mini refresh to save a call, but these get
-// called like never
-export function handlePlanetUnDelegated(event: PlanetDelegated): void {
-    let contract = Contract.bind(event.address);
-
-    let locationDec = event.params.loc;
-    let rawPlanet = contract.planets(locationDec);
-    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
-
-    let locationId = locationDecToLocationId(locationDec);
-    let planet = Planet.load(locationId);
-    planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
-    planet.save();
 }
 
 export function handlePlayerInitialized(event: PlayerInitialized): void {
@@ -478,6 +447,7 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+
     return planet;
 }
 
