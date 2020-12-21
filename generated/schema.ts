@@ -359,6 +359,33 @@ export class Planet extends Entity {
   set silverSpentComputed(value: i32) {
     this.set("silverSpentComputed", Value.fromI32(value));
   }
+
+  get hasTriedFindingArtifact(): boolean {
+    let value = this.get("hasTriedFindingArtifact");
+    return value.toBoolean();
+  }
+
+  set hasTriedFindingArtifact(value: boolean) {
+    this.set("hasTriedFindingArtifact", Value.fromBoolean(value));
+  }
+
+  get heldArtifactId(): i32 {
+    let value = this.get("heldArtifactId");
+    return value.toI32();
+  }
+
+  set heldArtifactId(value: i32) {
+    this.set("heldArtifactId", Value.fromI32(value));
+  }
+
+  get artifactLockedTimestamp(): i32 {
+    let value = this.get("artifactLockedTimestamp");
+    return value.toI32();
+  }
+
+  set artifactLockedTimestamp(value: i32) {
+    this.set("artifactLockedTimestamp", Value.fromI32(value));
+  }
 }
 
 export class DepartureQueue extends Entity {

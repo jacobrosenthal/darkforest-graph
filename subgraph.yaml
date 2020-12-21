@@ -8,9 +8,9 @@ dataSources:
       name: Contract
       network: xdai
       source:
-          address: "0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"
+          address: "0x2C8Bbb1CBFbe87C4BdCc6C75Aa52e079d854f254"
           abi: Contract
-          startBlock: 12314144
+          startBlock: 13648958
       mapping:
           kind: ethereum/events
           apiVersion: 0.0.4
@@ -28,10 +28,12 @@ dataSources:
               - name: Contract
                 file: ./abis/Contract.json
           eventHandlers:
-              - event: PlanetDelegated(uint256,address)
-                handler: handlePlanetDelegated
-              - event: PlanetUndelegated(uint256,address)
-                handler: handlePlanetUndelegated
+              - event: WithdrewArtifact(uint256,address,uint256)
+                handler: handleWithdrewArtifact
+              - event: FoundArtifact(uint256,address,uint256)
+                handler: handleFoundArtifact
+              - event: PlanetTransferred(uint256,address)
+                handler: handlePlanetTransferred
               - event: PlanetUpgraded(uint256)
                 handler: handlePlanetUpgraded
               - event: BoughtHat(uint256)

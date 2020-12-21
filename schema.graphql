@@ -40,6 +40,9 @@ type Planet @entity {
     spaceType: SpaceType!
     "Computed silver cost of applied upgrades"
     silverSpentComputed: Int!
+    hasTriedFindingArtifact: Boolean!
+    heldArtifactId: Int!
+    artifactLockedTimestamp: Int!
 }
 
 type DepartureQueue @entity  {

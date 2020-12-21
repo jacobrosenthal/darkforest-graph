@@ -5,9 +5,11 @@ import {
     PlanetUpgraded,
     PlayerInitialized,
     BoughtHat,
+    FoundArtifact,
+    WithdrewArtifact,
+    PlanetTransferred,
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult,
-    PlanetDelegated
 } from "../generated/Contract/Contract";
 import { Arrival, ArrivalQueue, Meta, Player, Planet, DepartureQueue, Hat, Upgrade } from "../generated/schema";
 
@@ -41,30 +43,48 @@ function toPlanetResource(planetResource: string): string {
     }
 }
 
-// Note i could mini refresh to save a call, but these get
-// called like never
-export function handlePlanetDelegated(event: PlanetDelegated): void {
+
+//todo artifacts
+export function handleFoundArtifact(event: FoundArtifact): void {
     let contract = Contract.bind(event.address);
 
-    let locationDec = event.params.loc;
-    let rawPlanet = contract.planets(locationDec);
-    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+    // event.params.loc;
+    // event.params.owner;
+    // event.params.artifactIds;
 
+    let locationDec = event.params.loc;
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+    let rawPlanet = contract.planets(locationDec);
     let locationId = locationDecToLocationId(locationDec);
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
 }
 
-// Note i could mini refresh to save a call, but these get
-// called like never
-export function handlePlanetUnDelegated(event: PlanetDelegated): void {
+
+
+//todo artifacts
+export function handleWithdrewArtifact(event: WithdrewArtifact): void {
     let contract = Contract.bind(event.address);
 
-    let locationDec = event.params.loc;
-    let rawPlanet = contract.planets(locationDec);
-    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+    // event.params.loc;
+    // event.params.owner;
+    // event.params.artifactIds;
 
+    let locationDec = event.params.loc;
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+    let rawPlanet = contract.planets(locationDec);
+    let locationId = locationDecToLocationId(locationDec);
+    let planet = Planet.load(locationId);
+    planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
+    planet.save();
+}
+
+export function handlePlanetTransferred(event: PlanetTransferred): void {
+    let contract = Contract.bind(event.address);
+    let locationDec = event.params.loc;
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+    let rawPlanet = contract.planets(locationDec);
     let locationId = locationDecToLocationId(locationDec);
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
@@ -443,6 +463,10 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
 
+    planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
+    planet.heldArtifactId = planetExtendedInfo.value10.toI32();
+    planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+
     //localstuff
     planet.silverSpentComputed = 0;
     planet.locationDec = locationDec;
@@ -478,6 +502,11 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+
+    planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
+    planet.heldArtifactId = planetExtendedInfo.value10.toI32();
+    planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+
     return planet;
 }
 
