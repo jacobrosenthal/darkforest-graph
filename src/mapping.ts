@@ -308,6 +308,10 @@ function getSilverOverTime(
     endTimeS: i32
 ): i32 {
 
+    if (endTimeS <= startTimeS) {
+        return planet.silverLazy;
+    }
+
     if (!hasOwner(planet)) {
         return planet.silverLazy;
     }
@@ -316,34 +320,51 @@ function getSilverOverTime(
         return planet.silverCap;
     }
 
-    let timeElapsed: f64 = endTimeS - startTimeS;
-    let silverGrowth: f64 = planet.silverGrowth;
-    let silver: f64 = planet.silverLazy;
-    let silverCap: f64 = planet.silverCap;
+    let silver = f64(planet.silverLazy);
+    let silverCap = f64(planet.silverCap); // 60000000 current max
+    let silverGrowth = f64(planet.silverGrowth); // 3333 current max
+    let timeElapsed = f64(endTimeS - startTimeS); // this can be arbitrarily large if months passed~2 weeks is 902725
 
-    return Math.min(
-        timeElapsed * silverGrowth + silver,
-        silverCap
-    ) as i32;
+    // timeElapsed * silverGrowth + silver <= i32.MAX_VALUE
+    // assert(timeElapsed <= (i32.MAX_VALUE - silver) / silverGrowth);
+    if (timeElapsed > (i32.MAX_VALUE - silver) / silverGrowth) {
+        timeElapsed = (i32.MAX_VALUE - silver) / silverGrowth;
+    }
+
+    return i32(Math.min(timeElapsed * silverGrowth + silver, silverCap));
 }
 
 function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
-    if (planet.populationLazy === 0) {
-        return 0;
+
+    if (atTimeS <= planet.lastUpdated) {
+        return planet.populationLazy;
     }
 
     if (!hasOwner(planet)) {
         return planet.populationLazy;
     }
 
-    let population: f64 = planet.populationLazy;
-    let populationCap: f64 = planet.populationCap;
-    let populationGrowth: f64 = planet.populationGrowth;
-    let timeElapsed: f64 = atTimeS - planet.lastUpdated;
+    if (planet.populationLazy === 0) {
+        return 0;
+    }
 
-    let denominator: f64 = (Math.exp((-4 * populationGrowth * timeElapsed) / populationCap) *
-        (populationCap / population - 1) + 1);
-    return (populationCap / denominator) as i32;
+    let population = f64(planet.populationLazy);
+    let populationCap = f64(planet.populationCap); // 65000000 current max
+    let populationGrowth = f64(planet.populationGrowth); // 3000 current max
+    let timeElapsed = f64(atTimeS - planet.lastUpdated); // this can be arbitrarily large if months passed ~2 weeks is 902725
+
+    // (-4 * populationGrowth * timeElapsed) / populationCap >= f64.MIN_VALUE
+    // assert(timeElapsed <= (f64.MIN_VALUE * populationCap) * -4 * populationGrowth)
+    if (timeElapsed > (f64.MIN_VALUE * populationCap) * -4 * populationGrowth) {
+        timeElapsed = (f64.MIN_VALUE * populationCap) * -4 * populationGrowth;
+    }
+
+    // Math.exp between 0 and 1 as long as inside stays negative, so could be as big as populationCap+1
+    let denominator = Math.exp((-4 * populationGrowth * timeElapsed) / populationCap) *
+        (populationCap / population - 1) + 1;
+
+    //could be as big as populationCap
+    return i32(populationCap / denominator);
 }
 
 function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null {
