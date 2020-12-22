@@ -1,13 +1,17 @@
 type Player @entity {
-    id: ID! # 0x prefixed hex string, zero padded
+    "0x prefixed hex string, zero padded"
+    id: ID!
     initTimestamp: Int!
-    homeWorld: Planet # allows null because 0x0000000000000000000000000000000000000000 has no homeWorld
+    "allows null because 0x0000000000000000000000000000000000000000 has no homeWorld"
+    homeWorld: Planet
     planets: [Planet!]! @derivedFrom(field: "owner")
 }
 
 type Planet @entity {
-    id: ID! # 0 padded hex version of locationDec, no 0x prefix
-    locationDec: BigInt! # locationDec version of locationid
+    "0 padded hex version of locationDec, no 0x prefix"
+    id: ID!
+    "locationDec version of locationid"
+    locationDec: BigInt!
     owner: Player!
     isInitialized: Boolean!
     createdAt: Int!
@@ -34,27 +38,33 @@ type Planet @entity {
     hatLevel: Int!
     planetResource: PlanetResource!
     spaceType: SpaceType!
-    silverSpentComputed: Int! # Computed cost of applied upgrades
+    "Computed silver cost of applied upgrades"
+    silverSpentComputed: Int!
 }
 
 type DepartureQueue @entity  {
-    id: ID! # blocktime
+    "current blocktime of ArrivalQueue event. events are triggered before blockhandler so will be detected and processed by upcoming blockhandler of same blocktime"
+    id: ID!
     arrivalIds: [BigInt!]!
 }
 
 type ArrivalQueue @entity  {
-    id: ID! # decimal arrivalTime as a string
+    "decimal arrivalTime as a string"
+    id: ID!
     arrivals: [Arrival!]!
 }
 
 type Meta @entity  {
     id: ID!
-    lastProcessed: Int! # the last block timestamp the block handler processed arrivals for
+    "the last block timestamp the block handler processed arrivals for"
+    lastProcessed: Int!
 }
 
 type Arrival @entity {
-    id: ID! # decimal arrivalid as a string
-    arrivalId: Int! # same as id, but sortable because its an int
+    "decimal arrivalid as a string"
+    id: ID!
+    "same as id, but sortable because its an int"
+    arrivalId: Int!
     player: Player!
     fromPlanet: Planet!
     toPlanet: Planet!
@@ -67,16 +77,20 @@ type Arrival @entity {
 }
 
 type Hat @entity {
-    id: ID! # 0 padded hex version of locationDec, no 0x prefix
-    planet: Planet! # same as id, but linked to planets entity
+    "0 padded hex version of locationDec, no 0x prefix"
+    id: ID!
+    "same as id, but linked to planets entity"
+    planet: Planet!
     player: Player!
     hatLevel: Int
     timestamp: Int
 }
 
 type Upgrade @entity {
-    id: ID! # 0 padded hex version of locationDec, no 0x prefix
-    planet: Planet! # same as id, but linked to planets entity
+    "0 padded hex version of locationDec, no 0x prefix"
+    id: ID!
+    "same as id, but linked to planets entity"
+    planet: Planet!
     player: Player!
     timestamp: Int
 }
