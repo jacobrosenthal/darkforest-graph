@@ -9,6 +9,8 @@ import {
     Contract__planetsResult,
 } from "../generated/Contract/Contract";
 import { Arrival, ArrivalQueue, Meta, Player, Planet, DepartureQueue, Hat, Upgrade } from "../generated/schema";
+import { log } from '@graphprotocol/graph-ts'
+
 
 // NOTE: the timestamps within are all unix epoch in seconds NOT MILLISECONDS
 // like in all the JS code where youll see divided by contractPrecision. As a
@@ -145,6 +147,12 @@ function processDepartures(current: i32, contract: Contract): void {
 
             let arrivalId = arrivalIds[i];
 
+            log.error('Block number: {}, arrival: {}', [
+                current.toString(),
+                arrivalId.toString(),
+            ]);
+
+
             let rawArrival = contract.planetArrivals(arrivalId);
 
             let toPlanetDec = rawArrival.value3
@@ -152,36 +160,88 @@ function processDepartures(current: i32, contract: Contract): void {
             let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
             let fromPlanetLocationId = locationDecToLocationId(fromPlanetDec);
 
+            log.error('a fromPlanetDec: {}, toPlanetDec: {}', [
+                rawArrival.value2.toString(),
+                rawArrival.value3.toString(),
+            ]);
+
+
+            log.error('aaa {}', [""]);
+
+
             let arrival = new Arrival(arrivalId.toString());
+            log.error('bbb {}', [""]);
+
             arrival.arrivalId = arrivalId.toI32();
+            log.error('ccc {}', [""]);
+
             // addresses gets 0x prefixed and 0 padded in toHexString
             arrival.player = rawArrival.value1.toHexString();
+            log.error('dd {}', [""]);
+
             arrival.fromPlanet = fromPlanetLocationId;
+            log.error('ff {}', [""]);
+
             arrival.toPlanet = toPlanetLocationId;
+            log.error('gg {}', [""]);
+
             arrival.popArriving = rawArrival.value4.toI32();
+            log.error('hh {}', [""]);
+
             arrival.silverMoved = rawArrival.value5.toI32();
+            log.error('ii {}', [""]);
+
             arrival.departureTime = rawArrival.value6.toI32();
+            log.error('jj {}', [""]);
+
             arrival.arrivalTime = rawArrival.value7.toI32();
+            log.error('kk {}', [""]);
+
             arrival.receivedAt = current;
+            log.error('ll {}', [""]);
+
             // careful, we havent saved them to the store yet
 
             // heres our fromplanet mini refresh
             let rawFromPlanet = contract.planets(fromPlanetDec);
+            log.error('mm {}', [""]);
+
             let fromPlanet = Planet.load(fromPlanetLocationId);
+            log.error('nn {}', [""]);
+
             // addresses gets 0x prefixed and 0 padded in toHexString
             fromPlanet.owner = rawFromPlanet.value0.toHexString();
+            log.error('oo {}', [""]);
+
             fromPlanet.populationLazy = rawFromPlanet.value4.toI32();
+            log.error('pp {}', [""]);
+
             fromPlanet.silverLazy = rawFromPlanet.value10.toI32();
+            log.error('qq {}', [""]);
+
             fromPlanet.lastUpdated = current;
-            fromPlanet.save();
+            log.error('rr {}', [""]);
+
+            log.error('tt {}', [""]);
 
             let toPlanet = Planet.load(toPlanetLocationId);
+            log.error('uu {}', [""]);
+
+
+
+
             // had to make a new planet which refreshed it
             if (toPlanet === null) {
                 // todo this is the most costly path as its called in a loop.
                 // also happens constantly in the game..
                 // ideally detect and use contract.bulkGetPlanetsByIds
                 toPlanet = newPlanet(toPlanetDec, contract)
+
+
+
+
+
+
             } else {
 
                 let rawToPlanet = contract.planets(toPlanetDec);
@@ -193,7 +253,10 @@ function processDepartures(current: i32, contract: Contract): void {
                 toPlanet.silverLazy = rawToPlanet.value10.toI32();
                 toPlanet.lastUpdated = current;
             }
-            toPlanet.save();
+
+
+
+
 
             let arrivalTime = arrival.arrivalTime;
             // contract applied arrival for us?
@@ -213,6 +276,11 @@ function processDepartures(current: i32, contract: Contract): void {
                 pending.arrivals = pendingArrivals;
                 pending.save();
             }
+
+
+            toPlanet.save();
+
+            fromPlanet.save();
 
             arrival.save();
         }
@@ -411,6 +479,7 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+
 
     //localstuff
     planet.silverSpentComputed = 0;
