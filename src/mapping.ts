@@ -391,14 +391,14 @@ function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null
     if (arrival.player !== toPlanet.owner) {
         // attacking enemy - includes emptyAddress
 
-        let abc = Math.floor((shipsMoved * 100) / toPlanet.defense) as i32;
+        let abc = Math.floor(f64(shipsMoved * 100.0) / f64(toPlanet.defense)) as i32;
         if (toPlanet.populationLazy > abc) {
             // attack reduces target planet's garrison but doesn't conquer it
             toPlanet.populationLazy -= abc;
         } else {
             // conquers planet
             toPlanet.owner = arrival.player;
-            toPlanet.populationLazy = shipsMoved - Math.floor((toPlanet.populationLazy * toPlanet.defense) / 100) as i32;
+            toPlanet.populationLazy = shipsMoved - Math.floor((f64(toPlanet.populationLazy) * f64(toPlanet.defense)) / 100.0) as i32;
         }
     } else {
         // moving between my own planets
