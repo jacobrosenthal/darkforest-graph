@@ -285,17 +285,19 @@ function calculateSilverSpent(planet: Planet | null): i32 {
     ];
 
     // todo hardcoded?
-    let upgradeCosts: i32[] = [20, 40, 60, 80, 100];
+    let upgradeCosts: f64[] = [20, 40, 60, 80, 100];
     let totalUpgrades = 0;
     for (let i = 0; i < upgradeState.length; i++) {
         totalUpgrades += upgradeState[i];
     }
-    let totalUpgradeCostPercent = 0;
+    let totalUpgradeCostPercent: f64 = 0;
     for (let i = 0; i < totalUpgrades; i++) {
         totalUpgradeCostPercent += upgradeCosts[i];
     }
 
-    return (totalUpgradeCostPercent / 100) * planet.silverCap;
+    let silverSpent = (totalUpgradeCostPercent / 100.0) * f64(planet.silverCap);
+
+    return i32(silverSpent);
 }
 
 function hasOwner(planet: Planet | null): boolean {
@@ -389,9 +391,10 @@ function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null
     if (arrival.player !== toPlanet.owner) {
         // attacking enemy - includes emptyAddress
 
-        if (toPlanet.populationLazy > Math.floor((shipsMoved * 100) / toPlanet.defense) as i32) {
+        let abc = Math.floor((shipsMoved * 100) / toPlanet.defense) as i32;
+        if (toPlanet.populationLazy > abc) {
             // attack reduces target planet's garrison but doesn't conquer it
-            toPlanet.populationLazy -= Math.floor((shipsMoved * 100) / toPlanet.defense) as i32;
+            toPlanet.populationLazy -= abc;
         } else {
             // conquers planet
             toPlanet.owner = arrival.player;
