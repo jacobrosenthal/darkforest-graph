@@ -501,36 +501,29 @@ function setup(timestamp: i32): Meta | null {
     return meta;
 }
 
-
-// 0 index count chars
-// 000063220027323fdc04a3e25a94dd995345e07bf016e8afcbb94b881b8e8e2e
-// 0 index count bytes
-// 00 00 63 22 00 27 32 3f dc 04 a3 e2 5a 94 dd 99 53 45 e0 7b f0 16 e8 af cb b9 4b 88 1b 8e 8e 2e
-
-// byte 9: population cap bonus. Population cap is doubled if this value is < 16
-// byte 9 is dc, chars 16 and 17, if 16 is 0, then the byte is < 16
+// byte 9: population cap bonus if byte is < 16
 function isPopCapBoost(locationId: String): boolean {
-    return locationId.charAt(16) === "0";
+    return locationId.charAt(18) === "0";
 }
 
 // byte 10: population grow bonus if byte is < 16
 function isPopGroBoost(locationId: String): boolean {
-    return locationId.charAt(18) === "0";
+    return locationId.charAt(20) === "0";
 }
 
 // byte 11: range bonus if byte is < 16
 function isRangeBoost(locationId: String): boolean {
-    return locationId.charAt(20) === "0";
+    return locationId.charAt(22) === "0";
 }
 
 // byte 12: speed bonus if byte is < 16
 function isSpeedBoost(locationId: String): boolean {
-    return locationId.charAt(22) === "0";
+    return locationId.charAt(24) === "0";
 }
 
 // byte 13: defense bonus if byte is < 16
 function isDefBoost(locationId: String): boolean {
-    return locationId.charAt(24) === "0";
+    return locationId.charAt(26) === "0";
 }
 
 function locationDecToLocationId(locationDec: BigInt): String {
