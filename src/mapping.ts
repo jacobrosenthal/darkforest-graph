@@ -15,9 +15,11 @@ import { Arrival, ArrivalQueue, Meta, Player, Planet, DepartureQueue, Hat, Upgra
 // like in all the JS code where youll see divided by contractPrecision. As a
 // result be very careful with your copy pastes. And TODO, unify the codebases
 
-// A lot of the Math fn aren't available as BigInt so we get out of BigInt from
-// the contract asap where possible. However due to overflows we cast variables
-// to f64 during calculations then back to i32 at the end avoid overflows.
+// Bigint returns to js as a string which is unfortunate for downstream users.
+// Also a lot of the Math fn aren't available as BigInt. BigInt only has i32
+// conversions which shoould be safe to hold all variables. However due to
+// overflows we must upcast everything to f64 during calculations then safely
+// back down to i32 at the end avoid overflows.
 
 // As contract is currently written, an energy refresh happens as part of all
 // event handlers. Thus it is required to handle all of them and do a full or
@@ -295,7 +297,7 @@ function calculateSilverSpent(planet: Planet | null): i32 {
         totalUpgradeCostPercent += upgradeCosts[i];
     }
 
-    let silverSpent = (totalUpgradeCostPercent / 100.0) * f64(planet.silverCap);
+    let silverSpent: f64 = (totalUpgradeCostPercent / 100.0) * f64(planet.silverCap);
 
     return i32(silverSpent);
 }
@@ -329,8 +331,8 @@ function getSilverOverTime(
 
     // timeElapsed * silverGrowth + silver <= i32.MAX_VALUE
     // assert(timeElapsed <= (i32.MAX_VALUE - silver) / silverGrowth);
-    if (timeElapsed > (i32.MAX_VALUE - silver) / silverGrowth) {
-        timeElapsed = (i32.MAX_VALUE - silver) / silverGrowth;
+    if (timeElapsed > (f64(i32.MAX_VALUE) - silver) / silverGrowth) {
+        timeElapsed = (f64(i32.MAX_VALUE) - silver) / silverGrowth;
     }
 
     return i32(Math.min(timeElapsed * silverGrowth + silver, silverCap));
@@ -357,13 +359,13 @@ function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
 
     // (-4 * populationGrowth * timeElapsed) / populationCap >= f64.MIN_VALUE
     // assert(timeElapsed <= (f64.MIN_VALUE * populationCap) * -4 * populationGrowth)
-    if (timeElapsed > (f64.MIN_VALUE * populationCap) * -4 * populationGrowth) {
-        timeElapsed = (f64.MIN_VALUE * populationCap) * -4 * populationGrowth;
+    if (timeElapsed > (f64.MIN_VALUE * populationCap) * -4.0 * populationGrowth) {
+        timeElapsed = (f64.MIN_VALUE * populationCap) * -4.0 * populationGrowth;
     }
 
     // Math.exp between 0 and 1 as long as inside stays negative, so could be as big as populationCap+1
-    let denominator = Math.exp((-4 * populationGrowth * timeElapsed) / populationCap) *
-        (populationCap / population - 1) + 1;
+    let denominator: f64 = Math.exp((-4.0 * populationGrowth * timeElapsed) / populationCap) *
+        (populationCap / population - 1.0) + 1.0;
 
     //could be as big as populationCap
     return i32(populationCap / denominator);
@@ -391,14 +393,14 @@ function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null
     if (arrival.player !== toPlanet.owner) {
         // attacking enemy - includes emptyAddress
 
-        let abc = Math.floor(f64(shipsMoved * 100.0) / f64(toPlanet.defense)) as i32;
+        let abc = i32(Math.trunc(f64(shipsMoved) * 100.0) / f64(toPlanet.defense))
         if (toPlanet.populationLazy > abc) {
             // attack reduces target planet's garrison but doesn't conquer it
             toPlanet.populationLazy -= abc;
         } else {
             // conquers planet
             toPlanet.owner = arrival.player;
-            toPlanet.populationLazy = shipsMoved - Math.floor((f64(toPlanet.populationLazy) * f64(toPlanet.defense)) / 100.0) as i32;
+            toPlanet.populationLazy = shipsMoved - i32(Math.trunc((f64(toPlanet.populationLazy) * f64(toPlanet.defense)) / 100.0));
         }
     } else {
         // moving between my own planets
