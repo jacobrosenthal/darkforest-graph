@@ -189,31 +189,31 @@ export class Planet extends Entity {
     this.set("defense", Value.fromI32(value));
   }
 
-  get populationLazy(): i32 {
-    let value = this.get("populationLazy");
+  get energyLazy(): i32 {
+    let value = this.get("energyLazy");
     return value.toI32();
   }
 
-  set populationLazy(value: i32) {
-    this.set("populationLazy", Value.fromI32(value));
+  set energyLazy(value: i32) {
+    this.set("energyLazy", Value.fromI32(value));
   }
 
-  get populationCap(): i32 {
-    let value = this.get("populationCap");
+  get energyCap(): i32 {
+    let value = this.get("energyCap");
     return value.toI32();
   }
 
-  set populationCap(value: i32) {
-    this.set("populationCap", Value.fromI32(value));
+  set energyCap(value: i32) {
+    this.set("energyCap", Value.fromI32(value));
   }
 
-  get populationGrowth(): i32 {
-    let value = this.get("populationGrowth");
+  get energyGrowth(): i32 {
+    let value = this.get("energyGrowth");
     return value.toI32();
   }
 
-  set populationGrowth(value: i32) {
-    this.set("populationGrowth", Value.fromI32(value));
+  set energyGrowth(value: i32) {
+    this.set("energyGrowth", Value.fromI32(value));
   }
 
   get silverCap(): i32 {
@@ -279,22 +279,22 @@ export class Planet extends Entity {
     this.set("defenseUpgrades", Value.fromI32(value));
   }
 
-  get isPopulationCapBoosted(): boolean {
-    let value = this.get("isPopulationCapBoosted");
+  get isEnergyCapBoosted(): boolean {
+    let value = this.get("isEnergyCapBoosted");
     return value.toBoolean();
   }
 
-  set isPopulationCapBoosted(value: boolean) {
-    this.set("isPopulationCapBoosted", Value.fromBoolean(value));
+  set isEnergyCapBoosted(value: boolean) {
+    this.set("isEnergyCapBoosted", Value.fromBoolean(value));
   }
 
-  get isPopulationGrowthBoosted(): boolean {
-    let value = this.get("isPopulationGrowthBoosted");
+  get isEnergyGrowthBoosted(): boolean {
+    let value = this.get("isEnergyGrowthBoosted");
     return value.toBoolean();
   }
 
-  set isPopulationGrowthBoosted(value: boolean) {
-    this.set("isPopulationGrowthBoosted", Value.fromBoolean(value));
+  set isEnergyGrowthBoosted(value: boolean) {
+    this.set("isEnergyGrowthBoosted", Value.fromBoolean(value));
   }
 
   get isRangeBoosted(): boolean {
@@ -547,13 +547,13 @@ export class Arrival extends Entity {
     this.set("toPlanet", Value.fromString(value));
   }
 
-  get popArriving(): i32 {
-    let value = this.get("popArriving");
+  get energyArriving(): i32 {
+    let value = this.get("energyArriving");
     return value.toI32();
   }
 
-  set popArriving(value: i32) {
-    this.set("popArriving", Value.fromI32(value));
+  set energyArriving(value: i32) {
+    this.set("energyArriving", Value.fromI32(value));
   }
 
   get silverMoved(): i32 {

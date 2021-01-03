@@ -20,9 +20,9 @@ type Planet @entity {
     range: Int!
     speed: Int!
     defense: Int!
-    populationLazy: Int!
-    populationCap: Int!
-    populationGrowth: Int!
+    energyLazy: Int!
+    energyCap: Int!
+    energyGrowth: Int!
     silverCap: Int!
     silverGrowth: Int!
     silverLazy: Int!
@@ -30,8 +30,8 @@ type Planet @entity {
     rangeUpgrades: Int!
     speedUpgrades: Int!
     defenseUpgrades: Int!
-    isPopulationCapBoosted: Boolean!
-    isPopulationGrowthBoosted: Boolean!
+    isEnergyCapBoosted: Boolean!
+    isEnergyGrowthBoosted: Boolean!
     isRangeBoosted: Boolean!
     isSpeedBoosted: Boolean!
     isDefenseBoosted: Boolean!
@@ -68,7 +68,7 @@ type Arrival @entity {
     player: Player!
     fromPlanet: Planet!
     toPlanet: Planet!
-    popArriving: Int!
+    energyArriving: Int!
     silverMoved: Int!
     departureTime: Int!
     arrivalTime: Int!
