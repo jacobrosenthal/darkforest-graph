@@ -8,9 +8,9 @@ dataSources:
       name: Contract
       network: xdai
       source:
-          address: "0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"
+          address: "0x678ACb78948Be7F354B28DaAb79B1ABD81574c1B"
           abi: Contract
-          startBlock: 12314144
+          startBlock: 13700380
       mapping:
           kind: ethereum/events
           apiVersion: 0.0.4

@@ -90,7 +90,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
 export function handleBlock(block: ethereum.Block): void {
 
     // todo get this from subgraph.yaml or elsewhere somehow?
-    let contract = Contract.bind(Address.fromString("0xa8688cCF5E407C1C782CF0c19b3Ab2cE477Fd739"));
+    let contract = Contract.bind(Address.fromString("0x678ACb78948Be7F354B28DaAb79B1ABD81574c1B"));
 
     let current = block.timestamp.toI32();
 
