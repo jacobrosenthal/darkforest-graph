@@ -233,39 +233,39 @@ function processDepartures(current: i32, contract: Contract): void {
     let departures = DepartureQueue.load(current.toString());
     if (departures !== null) {
 
-
         let arrivalIds = departures.arrivalIds;
+
+        let compactArrivals = contract.bulkGetCompactArrivalsByIds(departures.arrivalIds);
+
         for (let i = 0; i < arrivalIds.length; i++) {
 
+            let compactArrival = compactArrivals[i];
             let arrivalId = arrivalIds[i];
 
-            let rawArrival = contract.planetArrivals(arrivalId);
-
-            let toPlanetDec = rawArrival.value3
-            let fromPlanetDec = rawArrival.value2
+            let toPlanetDec = compactArrival.toPlanet
+            let fromPlanetDec = compactArrival.fromPlanet
             let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
             let fromPlanetLocationId = locationDecToLocationId(fromPlanetDec);
 
             let arrival = new Arrival(arrivalId.toString());
             arrival.arrivalId = arrivalId.toI32();
             // addresses gets 0x prefixed and 0 padded in toHexString
-            arrival.player = rawArrival.value1.toHexString();
+            arrival.player = compactArrival.fromPlanetOwner.toHexString();
             arrival.fromPlanet = fromPlanetLocationId;
             arrival.toPlanet = toPlanetLocationId;
-            arrival.energyArriving = rawArrival.value4.toI32();
-            arrival.silverMoved = rawArrival.value5.toI32();
-            arrival.departureTime = rawArrival.value6.toI32();
-            arrival.arrivalTime = rawArrival.value7.toI32();
+            arrival.energyArriving = compactArrival.popArriving.toI32();
+            arrival.silverMoved = compactArrival.silverMoved.toI32();
+            arrival.departureTime = compactArrival.departureTime.toI32();
+            arrival.arrivalTime = compactArrival.arrivalTime.toI32();
             arrival.receivedAt = current;
             // careful, we havent saved them to the store yet
 
             // heres our fromplanet mini refresh
-            let rawFromPlanet = contract.planets(fromPlanetDec);
             let fromPlanet = Planet.load(fromPlanetLocationId);
             // addresses gets 0x prefixed and 0 padded in toHexString
-            fromPlanet.owner = rawFromPlanet.value0.toHexString();
-            fromPlanet.energyLazy = rawFromPlanet.value4.toI32();
-            fromPlanet.silverLazy = rawFromPlanet.value10.toI32();
+            fromPlanet.owner = compactArrival.fromPlanetOwner.toHexString();
+            fromPlanet.energyLazy = compactArrival.fromPlanetPopulation.toI32();;
+            fromPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
             fromPlanet.lastUpdated = current;
             fromPlanet.save();
 
@@ -278,13 +278,11 @@ function processDepartures(current: i32, contract: Contract): void {
                 toPlanet = newPlanet(toPlanetDec, contract)
             } else {
 
-                let rawToPlanet = contract.planets(toPlanetDec);
-
                 // or get a mini refresh
                 // addresses gets 0x prefixed and 0 padded in toHexString
-                toPlanet.owner = rawToPlanet.value0.toHexString();
-                toPlanet.energyLazy = rawToPlanet.value4.toI32();
-                toPlanet.silverLazy = rawToPlanet.value10.toI32();
+                toPlanet.owner = compactArrival.toPlanetOwner.toHexString();
+                toPlanet.energyLazy = compactArrival.toPlanetPopulation.toI32();
+                toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
                 toPlanet.lastUpdated = current;
             }
             toPlanet.save();
