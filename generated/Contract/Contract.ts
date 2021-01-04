@@ -46,16 +46,16 @@ export class BoughtHat__Params {
   }
 }
 
-export class PlanetDelegated extends ethereum.Event {
-  get params(): PlanetDelegated__Params {
-    return new PlanetDelegated__Params(this);
+export class DepositedArtifact extends ethereum.Event {
+  get params(): DepositedArtifact__Params {
+    return new DepositedArtifact__Params(this);
   }
 }
 
-export class PlanetDelegated__Params {
-  _event: PlanetDelegated;
+export class DepositedArtifact__Params {
+  _event: DepositedArtifact;
 
-  constructor(event: PlanetDelegated) {
+  constructor(event: DepositedArtifact) {
     this._event = event;
   }
 
@@ -66,18 +66,48 @@ export class PlanetDelegated__Params {
   get player(): Address {
     return this._event.parameters[1].value.toAddress();
   }
-}
 
-export class PlanetUndelegated extends ethereum.Event {
-  get params(): PlanetUndelegated__Params {
-    return new PlanetUndelegated__Params(this);
+  get artifactId(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
   }
 }
 
-export class PlanetUndelegated__Params {
-  _event: PlanetUndelegated;
+export class FoundArtifact extends ethereum.Event {
+  get params(): FoundArtifact__Params {
+    return new FoundArtifact__Params(this);
+  }
+}
 
-  constructor(event: PlanetUndelegated) {
+export class FoundArtifact__Params {
+  _event: FoundArtifact;
+
+  constructor(event: FoundArtifact) {
+    this._event = event;
+  }
+
+  get loc(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get player(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get artifactId(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class PlanetTransferred extends ethereum.Event {
+  get params(): PlanetTransferred__Params {
+    return new PlanetTransferred__Params(this);
+  }
+}
+
+export class PlanetTransferred__Params {
+  _event: PlanetTransferred;
+
+  constructor(event: PlanetTransferred) {
     this._event = event;
   }
 
@@ -130,7 +160,203 @@ export class PlayerInitialized__Params {
   }
 }
 
+export class WithdrewArtifact extends ethereum.Event {
+  get params(): WithdrewArtifact__Params {
+    return new WithdrewArtifact__Params(this);
+  }
+}
+
+export class WithdrewArtifact__Params {
+  _event: WithdrewArtifact;
+
+  constructor(event: WithdrewArtifact) {
+    this._event = event;
+  }
+
+  get loc(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get player(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get artifactId(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class Contract__bulkGetArtifactsByIdsResultRetStruct extends ethereum.Tuple {
+  get artifact(): Contract__bulkGetArtifactsByIdsResultRetArtifactStruct {
+    return this[0].toTuple() as Contract__bulkGetArtifactsByIdsResultRetArtifactStruct;
+  }
+
+  get upgrade(): Contract__bulkGetArtifactsByIdsResultRetUpgradeStruct {
+    return this[1].toTuple() as Contract__bulkGetArtifactsByIdsResultRetUpgradeStruct;
+  }
+
+  get owner(): Address {
+    return this[2].toAddress();
+  }
+
+  get locationId(): BigInt {
+    return this[3].toBigInt();
+  }
+}
+
+export class Contract__bulkGetArtifactsByIdsResultRetArtifactStruct extends ethereum.Tuple {
+  get id(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get planetDiscoveredOn(): BigInt {
+    return this[1].toBigInt();
+  }
+
+  get planetLevel(): BigInt {
+    return this[2].toBigInt();
+  }
+
+  get planetBiome(): i32 {
+    return this[3].toI32();
+  }
+
+  get mintedAtTimestamp(): BigInt {
+    return this[4].toBigInt();
+  }
+
+  get discoverer(): Address {
+    return this[5].toAddress();
+  }
+
+  get artifactType(): i32 {
+    return this[6].toI32();
+  }
+}
+
+export class Contract__bulkGetArtifactsByIdsResultRetUpgradeStruct extends ethereum.Tuple {
+  get popCapMultiplier(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get popGroMultiplier(): BigInt {
+    return this[1].toBigInt();
+  }
+
+  get rangeMultiplier(): BigInt {
+    return this[2].toBigInt();
+  }
+
+  get speedMultiplier(): BigInt {
+    return this[3].toBigInt();
+  }
+
+  get defMultiplier(): BigInt {
+    return this[4].toBigInt();
+  }
+}
+
+export class Contract__bulkGetCompactArrivalsByIdsResultRetStruct extends ethereum.Tuple {
+  get popArriving(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get silverMoved(): BigInt {
+    return this[1].toBigInt();
+  }
+
+  get departureTime(): BigInt {
+    return this[2].toBigInt();
+  }
+
+  get arrivalTime(): BigInt {
+    return this[3].toBigInt();
+  }
+
+  get fromPlanet(): BigInt {
+    return this[4].toBigInt();
+  }
+
+  get fromPlanetOwner(): Address {
+    return this[5].toAddress();
+  }
+
+  get fromPlanetPopulation(): BigInt {
+    return this[6].toBigInt();
+  }
+
+  get fromPlanetSilver(): BigInt {
+    return this[7].toBigInt();
+  }
+
+  get toPlanet(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get toPlanetOwner(): Address {
+    return this[9].toAddress();
+  }
+
+  get toPlanetPopulation(): BigInt {
+    return this[10].toBigInt();
+  }
+
+  get toPlanetSilver(): BigInt {
+    return this[11].toBigInt();
+  }
+}
+
 export class Contract__bulkGetPlanetsResultRetStruct extends ethereum.Tuple {
+  get owner(): Address {
+    return this[0].toAddress();
+  }
+
+  get range(): BigInt {
+    return this[1].toBigInt();
+  }
+
+  get speed(): BigInt {
+    return this[2].toBigInt();
+  }
+
+  get defense(): BigInt {
+    return this[3].toBigInt();
+  }
+
+  get population(): BigInt {
+    return this[4].toBigInt();
+  }
+
+  get populationCap(): BigInt {
+    return this[5].toBigInt();
+  }
+
+  get populationGrowth(): BigInt {
+    return this[6].toBigInt();
+  }
+
+  get planetResource(): i32 {
+    return this[7].toI32();
+  }
+
+  get silverCap(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get silverGrowth(): BigInt {
+    return this[9].toBigInt();
+  }
+
+  get silver(): BigInt {
+    return this[10].toBigInt();
+  }
+
+  get planetLevel(): BigInt {
+    return this[11].toBigInt();
+  }
+}
+
+export class Contract__bulkGetPlanetsByIdsResultRetStruct extends ethereum.Tuple {
   get owner(): Address {
     return this[0].toAddress();
   }
@@ -217,8 +443,136 @@ export class Contract__bulkGetPlanetsExtendedInfoResultRetStruct extends ethereu
     return this[8].toBigInt();
   }
 
-  get delegatedPlayers(): Array<Address> {
-    return this[9].toAddressArray();
+  get hasTriedFindingArtifact(): boolean {
+    return this[9].toBoolean();
+  }
+
+  get heldArtifactId(): BigInt {
+    return this[10].toBigInt();
+  }
+
+  get artifactLockedTimestamp(): BigInt {
+    return this[11].toBigInt();
+  }
+}
+
+export class Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct extends ethereum.Tuple {
+  get isInitialized(): boolean {
+    return this[0].toBoolean();
+  }
+
+  get createdAt(): BigInt {
+    return this[1].toBigInt();
+  }
+
+  get lastUpdated(): BigInt {
+    return this[2].toBigInt();
+  }
+
+  get perlin(): BigInt {
+    return this[3].toBigInt();
+  }
+
+  get spaceType(): i32 {
+    return this[4].toI32();
+  }
+
+  get upgradeState0(): BigInt {
+    return this[5].toBigInt();
+  }
+
+  get upgradeState1(): BigInt {
+    return this[6].toBigInt();
+  }
+
+  get upgradeState2(): BigInt {
+    return this[7].toBigInt();
+  }
+
+  get hatLevel(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get hasTriedFindingArtifact(): boolean {
+    return this[9].toBoolean();
+  }
+
+  get heldArtifactId(): BigInt {
+    return this[10].toBigInt();
+  }
+
+  get artifactLockedTimestamp(): BigInt {
+    return this[11].toBigInt();
+  }
+}
+
+export class Contract__getArtifactByIdResultRetStruct extends ethereum.Tuple {
+  get artifact(): Contract__getArtifactByIdResultRetArtifactStruct {
+    return this[0].toTuple() as Contract__getArtifactByIdResultRetArtifactStruct;
+  }
+
+  get upgrade(): Contract__getArtifactByIdResultRetUpgradeStruct {
+    return this[1].toTuple() as Contract__getArtifactByIdResultRetUpgradeStruct;
+  }
+
+  get owner(): Address {
+    return this[2].toAddress();
+  }
+
+  get locationId(): BigInt {
+    return this[3].toBigInt();
+  }
+}
+
+export class Contract__getArtifactByIdResultRetArtifactStruct extends ethereum.Tuple {
+  get id(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get planetDiscoveredOn(): BigInt {
+    return this[1].toBigInt();
+  }
+
+  get planetLevel(): BigInt {
+    return this[2].toBigInt();
+  }
+
+  get planetBiome(): i32 {
+    return this[3].toI32();
+  }
+
+  get mintedAtTimestamp(): BigInt {
+    return this[4].toBigInt();
+  }
+
+  get discoverer(): Address {
+    return this[5].toAddress();
+  }
+
+  get artifactType(): i32 {
+    return this[6].toI32();
+  }
+}
+
+export class Contract__getArtifactByIdResultRetUpgradeStruct extends ethereum.Tuple {
+  get popCapMultiplier(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get popGroMultiplier(): BigInt {
+    return this[1].toBigInt();
+  }
+
+  get rangeMultiplier(): BigInt {
+    return this[2].toBigInt();
+  }
+
+  get speedMultiplier(): BigInt {
+    return this[3].toBigInt();
+  }
+
+  get defMultiplier(): BigInt {
+    return this[4].toBigInt();
   }
 }
 
@@ -485,6 +839,9 @@ export class Contract__planetsExtendedInfoResult {
   value6: BigInt;
   value7: BigInt;
   value8: BigInt;
+  value9: boolean;
+  value10: BigInt;
+  value11: BigInt;
 
   constructor(
     value0: boolean,
@@ -495,7 +852,10 @@ export class Contract__planetsExtendedInfoResult {
     value5: BigInt,
     value6: BigInt,
     value7: BigInt,
-    value8: BigInt
+    value8: BigInt,
+    value9: boolean,
+    value10: BigInt,
+    value11: BigInt
   ) {
     this.value0 = value0;
     this.value1 = value1;
@@ -506,6 +866,9 @@ export class Contract__planetsExtendedInfoResult {
     this.value6 = value6;
     this.value7 = value7;
     this.value8 = value8;
+    this.value9 = value9;
+    this.value10 = value10;
+    this.value11 = value11;
   }
 
   toMap(): TypedMap<string, ethereum.Value> {
@@ -522,6 +885,9 @@ export class Contract__planetsExtendedInfoResult {
     map.set("value6", ethereum.Value.fromUnsignedBigInt(this.value6));
     map.set("value7", ethereum.Value.fromUnsignedBigInt(this.value7));
     map.set("value8", ethereum.Value.fromUnsignedBigInt(this.value8));
+    map.set("value9", ethereum.Value.fromBoolean(this.value9));
+    map.set("value10", ethereum.Value.fromUnsignedBigInt(this.value10));
+    map.set("value11", ethereum.Value.fromUnsignedBigInt(this.value11));
     return map;
   }
 }
@@ -578,6 +944,75 @@ export class Contract__upgradesResult {
 export class Contract extends ethereum.SmartContract {
   static bind(address: Address): Contract {
     return new Contract("Contract", address);
+  }
+
+  ARTIFACT_LOCKUP_DURATION_SECONDS(): BigInt {
+    let result = super.call(
+      "ARTIFACT_LOCKUP_DURATION_SECONDS",
+      "ARTIFACT_LOCKUP_DURATION_SECONDS():(uint256)",
+      []
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_ARTIFACT_LOCKUP_DURATION_SECONDS(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "ARTIFACT_LOCKUP_DURATION_SECONDS",
+      "ARTIFACT_LOCKUP_DURATION_SECONDS():(uint256)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  BIOME_THRESHOLD_1(): BigInt {
+    let result = super.call(
+      "BIOME_THRESHOLD_1",
+      "BIOME_THRESHOLD_1():(uint256)",
+      []
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_BIOME_THRESHOLD_1(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "BIOME_THRESHOLD_1",
+      "BIOME_THRESHOLD_1():(uint256)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  BIOME_THRESHOLD_2(): BigInt {
+    let result = super.call(
+      "BIOME_THRESHOLD_2",
+      "BIOME_THRESHOLD_2():(uint256)",
+      []
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_BIOME_THRESHOLD_2(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "BIOME_THRESHOLD_2",
+      "BIOME_THRESHOLD_2():(uint256)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
   DISABLE_ZK_CHECK(): boolean {
@@ -798,6 +1233,74 @@ export class Contract extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
+  bulkGetArtifactsByIds(
+    ids: Array<BigInt>
+  ): Array<Contract__bulkGetArtifactsByIdsResultRetStruct> {
+    let result = super.call(
+      "bulkGetArtifactsByIds",
+      "bulkGetArtifactsByIds(uint256[]):(((uint256,uint256,uint256,uint8,uint256,address,uint8),(uint256,uint256,uint256,uint256,uint256),address,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+
+    return result[0].toTupleArray<
+      Contract__bulkGetArtifactsByIdsResultRetStruct
+    >();
+  }
+
+  try_bulkGetArtifactsByIds(
+    ids: Array<BigInt>
+  ): ethereum.CallResult<
+    Array<Contract__bulkGetArtifactsByIdsResultRetStruct>
+  > {
+    let result = super.tryCall(
+      "bulkGetArtifactsByIds",
+      "bulkGetArtifactsByIds(uint256[]):(((uint256,uint256,uint256,uint8,uint256,address,uint8),(uint256,uint256,uint256,uint256,uint256),address,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      value[0].toTupleArray<Contract__bulkGetArtifactsByIdsResultRetStruct>()
+    );
+  }
+
+  bulkGetCompactArrivalsByIds(
+    ids: Array<BigInt>
+  ): Array<Contract__bulkGetCompactArrivalsByIdsResultRetStruct> {
+    let result = super.call(
+      "bulkGetCompactArrivalsByIds",
+      "bulkGetCompactArrivalsByIds(uint256[]):((uint256,uint256,uint256,uint256,uint256,address,uint256,uint256,uint256,address,uint256,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+
+    return result[0].toTupleArray<
+      Contract__bulkGetCompactArrivalsByIdsResultRetStruct
+    >();
+  }
+
+  try_bulkGetCompactArrivalsByIds(
+    ids: Array<BigInt>
+  ): ethereum.CallResult<
+    Array<Contract__bulkGetCompactArrivalsByIdsResultRetStruct>
+  > {
+    let result = super.tryCall(
+      "bulkGetCompactArrivalsByIds",
+      "bulkGetCompactArrivalsByIds(uint256[]):((uint256,uint256,uint256,uint256,uint256,address,uint256,uint256,uint256,address,uint256,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      value[0].toTupleArray<
+        Contract__bulkGetCompactArrivalsByIdsResultRetStruct
+      >()
+    );
+  }
+
   bulkGetPlanetIds(startIdx: BigInt, endIdx: BigInt): Array<BigInt> {
     let result = super.call(
       "bulkGetPlanetIds",
@@ -867,13 +1370,44 @@ export class Contract extends ethereum.SmartContract {
     );
   }
 
+  bulkGetPlanetsByIds(
+    ids: Array<BigInt>
+  ): Array<Contract__bulkGetPlanetsByIdsResultRetStruct> {
+    let result = super.call(
+      "bulkGetPlanetsByIds",
+      "bulkGetPlanetsByIds(uint256[]):((address,uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+
+    return result[0].toTupleArray<
+      Contract__bulkGetPlanetsByIdsResultRetStruct
+    >();
+  }
+
+  try_bulkGetPlanetsByIds(
+    ids: Array<BigInt>
+  ): ethereum.CallResult<Array<Contract__bulkGetPlanetsByIdsResultRetStruct>> {
+    let result = super.tryCall(
+      "bulkGetPlanetsByIds",
+      "bulkGetPlanetsByIds(uint256[]):((address,uint256,uint256,uint256,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      value[0].toTupleArray<Contract__bulkGetPlanetsByIdsResultRetStruct>()
+    );
+  }
+
   bulkGetPlanetsExtendedInfo(
     startIdx: BigInt,
     endIdx: BigInt
   ): Array<Contract__bulkGetPlanetsExtendedInfoResultRetStruct> {
     let result = super.call(
       "bulkGetPlanetsExtendedInfo",
-      "bulkGetPlanetsExtendedInfo(uint256,uint256):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,address[])[])",
+      "bulkGetPlanetsExtendedInfo(uint256,uint256):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bool,uint256,uint256)[])",
       [
         ethereum.Value.fromUnsignedBigInt(startIdx),
         ethereum.Value.fromUnsignedBigInt(endIdx)
@@ -893,7 +1427,7 @@ export class Contract extends ethereum.SmartContract {
   > {
     let result = super.tryCall(
       "bulkGetPlanetsExtendedInfo",
-      "bulkGetPlanetsExtendedInfo(uint256,uint256):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,address[])[])",
+      "bulkGetPlanetsExtendedInfo(uint256,uint256):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bool,uint256,uint256)[])",
       [
         ethereum.Value.fromUnsignedBigInt(startIdx),
         ethereum.Value.fromUnsignedBigInt(endIdx)
@@ -906,6 +1440,41 @@ export class Contract extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(
       value[0].toTupleArray<
         Contract__bulkGetPlanetsExtendedInfoResultRetStruct
+      >()
+    );
+  }
+
+  bulkGetPlanetsExtendedInfoByIds(
+    ids: Array<BigInt>
+  ): Array<Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct> {
+    let result = super.call(
+      "bulkGetPlanetsExtendedInfoByIds",
+      "bulkGetPlanetsExtendedInfoByIds(uint256[]):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bool,uint256,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+
+    return result[0].toTupleArray<
+      Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct
+    >();
+  }
+
+  try_bulkGetPlanetsExtendedInfoByIds(
+    ids: Array<BigInt>
+  ): ethereum.CallResult<
+    Array<Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct>
+  > {
+    let result = super.tryCall(
+      "bulkGetPlanetsExtendedInfoByIds",
+      "bulkGetPlanetsExtendedInfoByIds(uint256[]):((bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bool,uint256,uint256)[])",
+      [ethereum.Value.fromUnsignedBigIntArray(ids)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      value[0].toTupleArray<
+        Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct
       >()
     );
   }
@@ -942,6 +1511,31 @@ export class Contract extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddressArray());
   }
 
+  contractOwnedArtifactLocations(param0: BigInt): BigInt {
+    let result = super.call(
+      "contractOwnedArtifactLocations",
+      "contractOwnedArtifactLocations(uint256):(uint256)",
+      [ethereum.Value.fromUnsignedBigInt(param0)]
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_contractOwnedArtifactLocations(
+    param0: BigInt
+  ): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "contractOwnedArtifactLocations",
+      "contractOwnedArtifactLocations(uint256):(uint256)",
+      [ethereum.Value.fromUnsignedBigInt(param0)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
   cumulativeRarities(param0: BigInt): BigInt {
     let result = super.call(
       "cumulativeRarities",
@@ -963,6 +1557,58 @@ export class Contract extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  doesArtifactExist(tokenId: BigInt): boolean {
+    let result = super.call(
+      "doesArtifactExist",
+      "doesArtifactExist(uint256):(bool)",
+      [ethereum.Value.fromUnsignedBigInt(tokenId)]
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_doesArtifactExist(tokenId: BigInt): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "doesArtifactExist",
+      "doesArtifactExist(uint256):(bool)",
+      [ethereum.Value.fromUnsignedBigInt(tokenId)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
+  }
+
+  getArtifactById(
+    artifactId: BigInt
+  ): Contract__getArtifactByIdResultRetStruct {
+    let result = super.call(
+      "getArtifactById",
+      "getArtifactById(uint256):(((uint256,uint256,uint256,uint8,uint256,address,uint8),(uint256,uint256,uint256,uint256,uint256),address,uint256))",
+      [ethereum.Value.fromUnsignedBigInt(artifactId)]
+    );
+
+    return result[0].toTuple() as Contract__getArtifactByIdResultRetStruct;
+  }
+
+  try_getArtifactById(
+    artifactId: BigInt
+  ): ethereum.CallResult<Contract__getArtifactByIdResultRetStruct> {
+    let result = super.tryCall(
+      "getArtifactById",
+      "getArtifactById(uint256):(((uint256,uint256,uint256,uint8,uint256,address,uint8),(uint256,uint256,uint256,uint256,uint256),address,uint256))",
+      [ethereum.Value.fromUnsignedBigInt(artifactId)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      value[0].toTuple() as Contract__getArtifactByIdResultRetStruct
+    );
   }
 
   getDefaultStats(): Array<Contract__getDefaultStatsResultValue0Struct> {
@@ -1053,29 +1699,6 @@ export class Contract extends ethereum.SmartContract {
     );
   }
 
-  getPlanetCounts(): Array<BigInt> {
-    let result = super.call(
-      "getPlanetCounts",
-      "getPlanetCounts():(uint256[])",
-      []
-    );
-
-    return result[0].toBigIntArray();
-  }
-
-  try_getPlanetCounts(): ethereum.CallResult<Array<BigInt>> {
-    let result = super.tryCall(
-      "getPlanetCounts",
-      "getPlanetCounts():(uint256[])",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigIntArray());
-  }
-
   getPlanetCumulativeRarities(): Array<BigInt> {
     let result = super.call(
       "getPlanetCumulativeRarities",
@@ -1122,6 +1745,31 @@ export class Contract extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigIntArray());
   }
 
+  getPlayerArtifactIds(playerId: Address): Array<BigInt> {
+    let result = super.call(
+      "getPlayerArtifactIds",
+      "getPlayerArtifactIds(address):(uint256[])",
+      [ethereum.Value.fromAddress(playerId)]
+    );
+
+    return result[0].toBigIntArray();
+  }
+
+  try_getPlayerArtifactIds(
+    playerId: Address
+  ): ethereum.CallResult<Array<BigInt>> {
+    let result = super.tryCall(
+      "getPlayerArtifactIds",
+      "getPlayerArtifactIds(address):(uint256[])",
+      [ethereum.Value.fromAddress(playerId)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigIntArray());
+  }
+
   initializedPlanetCountByLevel(param0: BigInt): BigInt {
     let result = super.call(
       "initializedPlanetCountByLevel",
@@ -1145,38 +1793,6 @@ export class Contract extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
-  isDelegated(_location: BigInt, _player: Address): boolean {
-    let result = super.call(
-      "isDelegated",
-      "isDelegated(uint256,address):(bool)",
-      [
-        ethereum.Value.fromUnsignedBigInt(_location),
-        ethereum.Value.fromAddress(_player)
-      ]
-    );
-
-    return result[0].toBoolean();
-  }
-
-  try_isDelegated(
-    _location: BigInt,
-    _player: Address
-  ): ethereum.CallResult<boolean> {
-    let result = super.tryCall(
-      "isDelegated",
-      "isDelegated(uint256,address):(bool)",
-      [
-        ethereum.Value.fromUnsignedBigInt(_location),
-        ethereum.Value.fromAddress(_player)
-      ]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
   isPlayerInitialized(param0: Address): boolean {
@@ -1472,7 +2088,7 @@ export class Contract extends ethereum.SmartContract {
   planetsExtendedInfo(param0: BigInt): Contract__planetsExtendedInfoResult {
     let result = super.call(
       "planetsExtendedInfo",
-      "planetsExtendedInfo(uint256):(bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256)",
+      "planetsExtendedInfo(uint256):(bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bool,uint256,uint256)",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
 
@@ -1485,7 +2101,10 @@ export class Contract extends ethereum.SmartContract {
       result[5].toBigInt(),
       result[6].toBigInt(),
       result[7].toBigInt(),
-      result[8].toBigInt()
+      result[8].toBigInt(),
+      result[9].toBoolean(),
+      result[10].toBigInt(),
+      result[11].toBigInt()
     );
   }
 
@@ -1494,7 +2113,7 @@ export class Contract extends ethereum.SmartContract {
   ): ethereum.CallResult<Contract__planetsExtendedInfoResult> {
     let result = super.tryCall(
       "planetsExtendedInfo",
-      "planetsExtendedInfo(uint256):(bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256)",
+      "planetsExtendedInfo(uint256):(bool,uint256,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bool,uint256,uint256)",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
     if (result.reverted) {
@@ -1511,7 +2130,10 @@ export class Contract extends ethereum.SmartContract {
         value[5].toBigInt(),
         value[6].toBigInt(),
         value[7].toBigInt(),
-        value[8].toBigInt()
+        value[8].toBigInt(),
+        value[9].toBoolean(),
+        value[10].toBigInt(),
+        value[11].toBigInt()
       )
     );
   }
@@ -1700,36 +2322,6 @@ export class ChangeAdminCall__Outputs {
   }
 }
 
-export class ChangeGameEndTimeCall extends ethereum.Call {
-  get inputs(): ChangeGameEndTimeCall__Inputs {
-    return new ChangeGameEndTimeCall__Inputs(this);
-  }
-
-  get outputs(): ChangeGameEndTimeCall__Outputs {
-    return new ChangeGameEndTimeCall__Outputs(this);
-  }
-}
-
-export class ChangeGameEndTimeCall__Inputs {
-  _call: ChangeGameEndTimeCall;
-
-  constructor(call: ChangeGameEndTimeCall) {
-    this._call = call;
-  }
-
-  get _newGameEnd(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
-  }
-}
-
-export class ChangeGameEndTimeCall__Outputs {
-  _call: ChangeGameEndTimeCall;
-
-  constructor(call: ChangeGameEndTimeCall) {
-    this._call = call;
-  }
-}
-
 export class ChangeTarget4RadiusConstantCall extends ethereum.Call {
   get inputs(): ChangeTarget4RadiusConstantCall__Inputs {
     return new ChangeTarget4RadiusConstantCall__Inputs(this);
@@ -1760,66 +2352,66 @@ export class ChangeTarget4RadiusConstantCall__Outputs {
   }
 }
 
-export class ChangeTarget5RadiusConstantCall extends ethereum.Call {
-  get inputs(): ChangeTarget5RadiusConstantCall__Inputs {
-    return new ChangeTarget5RadiusConstantCall__Inputs(this);
+export class ChangeTokenMintEndTimeCall extends ethereum.Call {
+  get inputs(): ChangeTokenMintEndTimeCall__Inputs {
+    return new ChangeTokenMintEndTimeCall__Inputs(this);
   }
 
-  get outputs(): ChangeTarget5RadiusConstantCall__Outputs {
-    return new ChangeTarget5RadiusConstantCall__Outputs(this);
+  get outputs(): ChangeTokenMintEndTimeCall__Outputs {
+    return new ChangeTokenMintEndTimeCall__Outputs(this);
   }
 }
 
-export class ChangeTarget5RadiusConstantCall__Inputs {
-  _call: ChangeTarget5RadiusConstantCall;
+export class ChangeTokenMintEndTimeCall__Inputs {
+  _call: ChangeTokenMintEndTimeCall;
 
-  constructor(call: ChangeTarget5RadiusConstantCall) {
+  constructor(call: ChangeTokenMintEndTimeCall) {
     this._call = call;
   }
 
-  get _newConstant(): BigInt {
+  get _newEnd(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 }
 
-export class ChangeTarget5RadiusConstantCall__Outputs {
-  _call: ChangeTarget5RadiusConstantCall;
+export class ChangeTokenMintEndTimeCall__Outputs {
+  _call: ChangeTokenMintEndTimeCall;
 
-  constructor(call: ChangeTarget5RadiusConstantCall) {
+  constructor(call: ChangeTokenMintEndTimeCall) {
     this._call = call;
   }
 }
 
-export class DelegatePlanetCall extends ethereum.Call {
-  get inputs(): DelegatePlanetCall__Inputs {
-    return new DelegatePlanetCall__Inputs(this);
+export class DepositArtifactCall extends ethereum.Call {
+  get inputs(): DepositArtifactCall__Inputs {
+    return new DepositArtifactCall__Inputs(this);
   }
 
-  get outputs(): DelegatePlanetCall__Outputs {
-    return new DelegatePlanetCall__Outputs(this);
+  get outputs(): DepositArtifactCall__Outputs {
+    return new DepositArtifactCall__Outputs(this);
   }
 }
 
-export class DelegatePlanetCall__Inputs {
-  _call: DelegatePlanetCall;
+export class DepositArtifactCall__Inputs {
+  _call: DepositArtifactCall;
 
-  constructor(call: DelegatePlanetCall) {
+  constructor(call: DepositArtifactCall) {
     this._call = call;
   }
 
-  get _location(): BigInt {
+  get locationId(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get _player(): Address {
-    return this._call.inputValues[1].value.toAddress();
+  get artifactId(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
   }
 }
 
-export class DelegatePlanetCall__Outputs {
-  _call: DelegatePlanetCall;
+export class DepositArtifactCall__Outputs {
+  _call: DepositArtifactCall;
 
-  constructor(call: DelegatePlanetCall) {
+  constructor(call: DepositArtifactCall) {
     this._call = call;
   }
 }
@@ -1849,8 +2441,12 @@ export class InitializeCall__Inputs {
     return this._call.inputValues[1].value.toAddress();
   }
 
+  get _tokensAddress(): Address {
+    return this._call.inputValues[2].value.toAddress();
+  }
+
   get _disableZKCheck(): boolean {
-    return this._call.inputValues[2].value.toBoolean();
+    return this._call.inputValues[3].value.toBoolean();
   }
 }
 
@@ -1918,20 +2514,20 @@ export class RefreshPlanetCall__Outputs {
   }
 }
 
-export class UndelegatePlanetCall extends ethereum.Call {
-  get inputs(): UndelegatePlanetCall__Inputs {
-    return new UndelegatePlanetCall__Inputs(this);
+export class TransferOwnershipCall extends ethereum.Call {
+  get inputs(): TransferOwnershipCall__Inputs {
+    return new TransferOwnershipCall__Inputs(this);
   }
 
-  get outputs(): UndelegatePlanetCall__Outputs {
-    return new UndelegatePlanetCall__Outputs(this);
+  get outputs(): TransferOwnershipCall__Outputs {
+    return new TransferOwnershipCall__Outputs(this);
   }
 }
 
-export class UndelegatePlanetCall__Inputs {
-  _call: UndelegatePlanetCall;
+export class TransferOwnershipCall__Inputs {
+  _call: TransferOwnershipCall;
 
-  constructor(call: UndelegatePlanetCall) {
+  constructor(call: TransferOwnershipCall) {
     this._call = call;
   }
 
@@ -1944,10 +2540,10 @@ export class UndelegatePlanetCall__Inputs {
   }
 }
 
-export class UndelegatePlanetCall__Outputs {
-  _call: UndelegatePlanetCall;
+export class TransferOwnershipCall__Outputs {
+  _call: TransferOwnershipCall;
 
-  constructor(call: UndelegatePlanetCall) {
+  constructor(call: TransferOwnershipCall) {
     this._call = call;
   }
 }
@@ -2042,6 +2638,36 @@ export class WithdrawCall__Outputs {
   _call: WithdrawCall;
 
   constructor(call: WithdrawCall) {
+    this._call = call;
+  }
+}
+
+export class WithdrawArtifactCall extends ethereum.Call {
+  get inputs(): WithdrawArtifactCall__Inputs {
+    return new WithdrawArtifactCall__Inputs(this);
+  }
+
+  get outputs(): WithdrawArtifactCall__Outputs {
+    return new WithdrawArtifactCall__Outputs(this);
+  }
+}
+
+export class WithdrawArtifactCall__Inputs {
+  _call: WithdrawArtifactCall;
+
+  constructor(call: WithdrawArtifactCall) {
+    this._call = call;
+  }
+
+  get locationId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class WithdrawArtifactCall__Outputs {
+  _call: WithdrawArtifactCall;
+
+  constructor(call: WithdrawArtifactCall) {
     this._call = call;
   }
 }

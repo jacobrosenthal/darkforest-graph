@@ -40,6 +40,9 @@ type Planet @entity {
     spaceType: SpaceType!
     "Computed silver cost of applied upgrades"
     silverSpentComputed: Int!
+    hasTriedFindingArtifact: Boolean!
+    heldArtifactId: Int!
+    artifactLockedTimestamp: Int!
 }
 
 type DepartureQueue @entity  {
@@ -104,4 +107,38 @@ enum SpaceType {
     NEBULA
     SPACE
     DEEP_SPACE
+}
+
+type Artifact @entity {
+    "decimal artifactid as a string"
+    id: ID!
+    "same as id, but sortable because its an int"
+    artifactId: Int!
+    planetDiscoveredOn: Int!
+    planetLevel: Int!
+    planetBiome: Biome!
+    mintedAtTimestamp: Int!
+    discoverer: Player!
+    artifactType: ArtifactType!
+}
+
+enum ArtifactType {
+    UNKNOWN
+    OBELISK
+    COLOSSUS
+    SHIPWRECK
+    FOSSIL
+}
+
+enum Biome {
+    UNKNOWN,
+    OCEAN,
+    FOREST,
+    JUNGLE,
+    TUNDRA,
+    SWAMP,
+    DESERT,
+    ICE,
+    WASTELAND,
+    LAVA,
 }

@@ -7,7 +7,9 @@ import {
     BoughtHat,
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult,
-    PlanetDelegated
+    FoundArtifact,
+    WithdrewArtifact,
+    PlanetTransferred
 } from "../generated/Contract/Contract";
 import { Arrival, ArrivalQueue, Meta, Player, Planet, DepartureQueue, Hat, Upgrade } from "../generated/schema";
 
@@ -43,10 +45,69 @@ function toPlanetResource(planetResource: string): string {
     }
 }
 
-// Note i could mini refresh to save a call, but these get
-// called like never
-export function handlePlanetDelegated(event: PlanetDelegated): void {
+function toArtifactType(artifactType: string): string {
+    if (artifactType == "0") {
+        return "UNKNOWN";
+    } else if (artifactType == "1") {
+        return "OBELISK";
+    } else if (artifactType == "2") {
+        return "COLOSSUS";
+    } else if (artifactType == "3") {
+        return "SHIPWRECK";
+    } else if (artifactType == "4") {
+        return "FOSSIL";
+    }
+}
+
+function toBiome(biome: string): string {
+    if (biome == "0") {
+        return "UNKNOWN";
+    } else if (biome == "1") {
+        return "OCEAN";
+    } else if (biome == "2") {
+        return "FOREST";
+    } else if (biome == "3") {
+        return "JUNGLE";
+    } else if (biome == "4") {
+        return "TUNDRA";
+    } else if (biome == "5") {
+        return "SWAMP";
+    } else if (biome == "6") {
+        return "DESERT";
+    } else if (biome == "7") {
+        return "ICE";
+    } else if (biome == "8") {
+        return "WASTELAND";
+    } else if (biome == "9") {
+        return "LAVA";
+    }
+}
+
+//todo artifacts
+export function handleFoundArtifact(event: FoundArtifact): void {
     let contract = Contract.bind(event.address);
+
+    // event.params.loc;
+    // event.params.owner;
+    // event.params.artifactIds;
+
+    let locationDec = event.params.loc;
+    let rawPlanet = contract.planets(locationDec);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+
+    let locationId = locationDecToLocationId(locationDec);
+    let planet = Planet.load(locationId);
+    planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
+    planet.save();
+}
+
+//todo artifacts
+export function handleWithdrewArtifact(event: WithdrewArtifact): void {
+    let contract = Contract.bind(event.address);
+
+    // event.params.loc;
+    // event.params.owner;
+    // event.params.artifactIds;
 
     let locationDec = event.params.loc;
     let rawPlanet = contract.planets(locationDec);
@@ -60,7 +121,7 @@ export function handlePlanetDelegated(event: PlanetDelegated): void {
 
 // Note i could mini refresh to save a call, but these get
 // called like never
-export function handlePlanetUnDelegated(event: PlanetDelegated): void {
+export function handlePlanetTransferred(event: PlanetTransferred): void {
     let contract = Contract.bind(event.address);
 
     let locationDec = event.params.loc;
@@ -448,6 +509,10 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
 
+    planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
+    planet.heldArtifactId = planetExtendedInfo.value10.toI32();
+    planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+
     //localstuff
     planet.silverSpentComputed = 0;
     planet.locationDec = locationDec;
@@ -483,6 +548,11 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+
+    planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
+    planet.heldArtifactId = planetExtendedInfo.value10.toI32();
+    planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+
     return planet;
 }
 

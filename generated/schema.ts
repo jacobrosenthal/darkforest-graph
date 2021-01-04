@@ -359,6 +359,33 @@ export class Planet extends Entity {
   set silverSpentComputed(value: i32) {
     this.set("silverSpentComputed", Value.fromI32(value));
   }
+
+  get hasTriedFindingArtifact(): boolean {
+    let value = this.get("hasTriedFindingArtifact");
+    return value.toBoolean();
+  }
+
+  set hasTriedFindingArtifact(value: boolean) {
+    this.set("hasTriedFindingArtifact", Value.fromBoolean(value));
+  }
+
+  get heldArtifactId(): i32 {
+    let value = this.get("heldArtifactId");
+    return value.toI32();
+  }
+
+  set heldArtifactId(value: i32) {
+    this.set("heldArtifactId", Value.fromI32(value));
+  }
+
+  get artifactLockedTimestamp(): i32 {
+    let value = this.get("artifactLockedTimestamp");
+    return value.toI32();
+  }
+
+  set artifactLockedTimestamp(value: i32) {
+    this.set("artifactLockedTimestamp", Value.fromI32(value));
+  }
 }
 
 export class DepartureQueue extends Entity {
@@ -724,5 +751,99 @@ export class Upgrade extends Entity {
 
   set timestamp(value: i32) {
     this.set("timestamp", Value.fromI32(value));
+  }
+}
+
+export class Artifact extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Artifact entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Artifact entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Artifact", id.toString(), this);
+  }
+
+  static load(id: string): Artifact | null {
+    return store.get("Artifact", id) as Artifact | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get artifactId(): i32 {
+    let value = this.get("artifactId");
+    return value.toI32();
+  }
+
+  set artifactId(value: i32) {
+    this.set("artifactId", Value.fromI32(value));
+  }
+
+  get planetDiscoveredOn(): i32 {
+    let value = this.get("planetDiscoveredOn");
+    return value.toI32();
+  }
+
+  set planetDiscoveredOn(value: i32) {
+    this.set("planetDiscoveredOn", Value.fromI32(value));
+  }
+
+  get planetLevel(): i32 {
+    let value = this.get("planetLevel");
+    return value.toI32();
+  }
+
+  set planetLevel(value: i32) {
+    this.set("planetLevel", Value.fromI32(value));
+  }
+
+  get planetBiome(): string {
+    let value = this.get("planetBiome");
+    return value.toString();
+  }
+
+  set planetBiome(value: string) {
+    this.set("planetBiome", Value.fromString(value));
+  }
+
+  get mintedAtTimestamp(): i32 {
+    let value = this.get("mintedAtTimestamp");
+    return value.toI32();
+  }
+
+  set mintedAtTimestamp(value: i32) {
+    this.set("mintedAtTimestamp", Value.fromI32(value));
+  }
+
+  get discoverer(): string {
+    let value = this.get("discoverer");
+    return value.toString();
+  }
+
+  set discoverer(value: string) {
+    this.set("discoverer", Value.fromString(value));
+  }
+
+  get artifactType(): string {
+    let value = this.get("artifactType");
+    return value.toString();
+  }
+
+  set artifactType(value: string) {
+    this.set("artifactType", Value.fromString(value));
   }
 }
