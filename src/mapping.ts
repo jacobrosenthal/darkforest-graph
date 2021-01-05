@@ -8,10 +8,11 @@ import {
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult,
     FoundArtifact,
+    DepositedArtifact,
     WithdrewArtifact,
     PlanetTransferred
 } from "../generated/Contract/Contract";
-import { Arrival, ArrivalQueue, Meta, Player, Planet, DepartureQueue, Hat, Upgrade } from "../generated/schema";
+import { Arrival, ArrivalQueue, Artifact, Meta, Player, Planet, DepartureQueue, Hat, Upgrade } from "../generated/schema";
 
 // NOTE: the timestamps within are all unix epoch in seconds NOT MILLISECONDS
 // like in all the JS code where youll see divided by contractPrecision. As a
@@ -45,70 +46,83 @@ function toPlanetResource(planetResource: string): string {
     }
 }
 
-function toArtifactType(artifactType: string): string {
-    if (artifactType == "0") {
-        return "UNKNOWN";
-    } else if (artifactType == "1") {
+function toArtifactType(artifactType: i32): string {
+    if (artifactType == 1) {
         return "OBELISK";
-    } else if (artifactType == "2") {
+    } else if (artifactType == 2) {
         return "COLOSSUS";
-    } else if (artifactType == "3") {
+    } else if (artifactType == 3) {
         return "SHIPWRECK";
-    } else if (artifactType == "4") {
+    } else if (artifactType == 4) {
         return "FOSSIL";
-    }
-}
-
-function toBiome(biome: string): string {
-    if (biome == "0") {
+    } else {
         return "UNKNOWN";
-    } else if (biome == "1") {
-        return "OCEAN";
-    } else if (biome == "2") {
-        return "FOREST";
-    } else if (biome == "3") {
-        return "JUNGLE";
-    } else if (biome == "4") {
-        return "TUNDRA";
-    } else if (biome == "5") {
-        return "SWAMP";
-    } else if (biome == "6") {
-        return "DESERT";
-    } else if (biome == "7") {
-        return "ICE";
-    } else if (biome == "8") {
-        return "WASTELAND";
-    } else if (biome == "9") {
-        return "LAVA";
     }
 }
 
-//todo artifacts
+function toBiome(biome: i32): string {
+    if (biome == 1) {
+        return "OCEAN";
+    } else if (biome == 2) {
+        return "FOREST";
+    } else if (biome == 3) {
+        return "JUNGLE";
+    } else if (biome == 4) {
+        return "TUNDRA";
+    } else if (biome == 5) {
+        return "SWAMP";
+    } else if (biome == 6) {
+        return "DESERT";
+    } else if (biome == 7) {
+        return "ICE";
+    } else if (biome == 8) {
+        return "WASTELAND";
+    } else if (biome == 9) {
+        return "LAVA";
+    } else {
+        return "UNKNOWN";
+    }
+}
+
 export function handleFoundArtifact(event: FoundArtifact): void {
     let contract = Contract.bind(event.address);
 
-    // event.params.loc;
-    // event.params.owner;
-    // event.params.artifactIds;
-
     let locationDec = event.params.loc;
+    let locationId = locationDecToLocationId(locationDec);
+
+    let rawArtifact = contract.getArtifactById(event.params.artifactId);
+    // this has a 0x prefixed now..is that ok?
+    let artifact = new Artifact(event.params.artifactId.toHexString());
+    artifact.artifactId = event.params.artifactId;
+    artifact.planetDiscoveredOn = locationId;
+    artifact.planetLevel = rawArtifact.artifact.planetLevel.toI32();
+    artifact.planetBiome = toBiome(rawArtifact.artifact.planetBiome);
+    artifact.mintedAtTimestamp = rawArtifact.artifact.mintedAtTimestamp.toI32();
+    // addresses gets 0x prefixed and 0 padded in toHexString
+    artifact.discoverer = rawArtifact.artifact.discoverer.toHexString();
+    artifact.artifactType = toArtifactType(rawArtifact.artifact.artifactType);
+
+    artifact.energyCapMultiplier = rawArtifact.upgrade.popCapMultiplier.toI32();
+    artifact.energyGrowthMultiplier = rawArtifact.upgrade.popGroMultiplier.toI32();
+    artifact.rangeMultiplier = rawArtifact.upgrade.rangeMultiplier.toI32();
+    artifact.speedMultiplier = rawArtifact.upgrade.speedMultiplier.toI32();
+    artifact.defenseMultiplier = rawArtifact.upgrade.defMultiplier.toI32();
+
+    artifact.save();
+
+    // mini refresh
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
 
-    let locationId = locationDecToLocationId(locationDec);
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
 }
 
-//todo artifacts
 export function handleWithdrewArtifact(event: WithdrewArtifact): void {
     let contract = Contract.bind(event.address);
 
-    // event.params.loc;
-    // event.params.owner;
-    // event.params.artifactIds;
-
+    // mini refresh
     let locationDec = event.params.loc;
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
@@ -118,6 +132,21 @@ export function handleWithdrewArtifact(event: WithdrewArtifact): void {
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
 }
+
+export function handleDepositedArtifact(event: DepositedArtifact): void {
+    let contract = Contract.bind(event.address);
+
+    // mini refresh
+    let locationDec = event.params.loc;
+    let rawPlanet = contract.planets(locationDec);
+    let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
+
+    let locationId = locationDecToLocationId(locationDec);
+    let planet = Planet.load(locationId);
+    planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
+    planet.save();
+}
+
 
 // Note i could mini refresh to save a call, but these get
 // called like never
@@ -508,8 +537,14 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
-    planet.heldArtifactId = planetExtendedInfo.value10;
-    planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+    if (planetExtendedInfo.value10 !== BigInt.fromI32(0)) {
+        // 0x prefixed?
+        planet.heldArtifact = planetExtendedInfo.value10.toHexString();
+        planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+    } else {
+        planet.heldArtifact = null;
+        planet.artifactLockedTimestamp = null;
+    }
 
     //localstuff
     planet.silverSpentComputed = 0;
@@ -548,8 +583,14 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
-    planet.heldArtifactId = planetExtendedInfo.value10;
-    planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+    if (planetExtendedInfo.value10 !== BigInt.fromI32(0)) {
+        // 0x prefixed?
+        planet.heldArtifact = planetExtendedInfo.value10.toHexString();
+        planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+    } else {
+        planet.heldArtifact = null;
+        planet.artifactLockedTimestamp = null;
+    }
 
     return planet;
 }

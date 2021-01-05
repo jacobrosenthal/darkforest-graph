@@ -41,7 +41,7 @@ type Planet @entity {
     "Computed silver cost of applied upgrades"
     silverSpentComputed: Int!
     hasTriedFindingArtifact: Boolean!
-    heldArtifactId: BigInt!
+    heldArtifact: Artifact
     artifactLockedTimestamp: Int!
 }
 
@@ -113,13 +113,18 @@ type Artifact @entity {
     "decimal artifactid as a string"
     id: ID!
     "same as id, but sortable because its an int"
-    artifactId: Int!
-    planetDiscoveredOn: Int!
+    artifactId: BigInt!
+    planetDiscoveredOn: Planet!
     planetLevel: Int!
     planetBiome: Biome!
     mintedAtTimestamp: Int!
     discoverer: Player!
     artifactType: ArtifactType!
+    energyCapMultiplier: Int!,
+    energyGrowthMultiplier: Int!,
+    rangeMultiplier: Int!,
+    speedMultiplier: Int!,
+    defenseMultiplier: Int!
 }
 
 enum ArtifactType {

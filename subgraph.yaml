@@ -28,6 +28,8 @@ dataSources:
               - name: Contract
                 file: ./abis/Contract.json
           eventHandlers:
+              - event: DepositedArtifact(uint256,address,uint256)
+                handler: handleDepositedArtifact
               - event: WithdrewArtifact(uint256,address,uint256)
                 handler: handleWithdrewArtifact
               - event: FoundArtifact(uint256,address,uint256)

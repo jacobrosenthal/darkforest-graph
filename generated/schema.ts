@@ -369,13 +369,21 @@ export class Planet extends Entity {
     this.set("hasTriedFindingArtifact", Value.fromBoolean(value));
   }
 
-  get heldArtifactId(): BigInt {
-    let value = this.get("heldArtifactId");
-    return value.toBigInt();
+  get heldArtifact(): string | null {
+    let value = this.get("heldArtifact");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  set heldArtifactId(value: BigInt) {
-    this.set("heldArtifactId", Value.fromBigInt(value));
+  set heldArtifact(value: string | null) {
+    if (value === null) {
+      this.unset("heldArtifact");
+    } else {
+      this.set("heldArtifact", Value.fromString(value as string));
+    }
   }
 
   get artifactLockedTimestamp(): i32 {
@@ -784,22 +792,22 @@ export class Artifact extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get artifactId(): i32 {
+  get artifactId(): BigInt {
     let value = this.get("artifactId");
-    return value.toI32();
+    return value.toBigInt();
   }
 
-  set artifactId(value: i32) {
-    this.set("artifactId", Value.fromI32(value));
+  set artifactId(value: BigInt) {
+    this.set("artifactId", Value.fromBigInt(value));
   }
 
-  get planetDiscoveredOn(): i32 {
+  get planetDiscoveredOn(): string {
     let value = this.get("planetDiscoveredOn");
-    return value.toI32();
+    return value.toString();
   }
 
-  set planetDiscoveredOn(value: i32) {
-    this.set("planetDiscoveredOn", Value.fromI32(value));
+  set planetDiscoveredOn(value: string) {
+    this.set("planetDiscoveredOn", Value.fromString(value));
   }
 
   get planetLevel(): i32 {
@@ -845,5 +853,50 @@ export class Artifact extends Entity {
 
   set artifactType(value: string) {
     this.set("artifactType", Value.fromString(value));
+  }
+
+  get energyCapMultiplier(): i32 {
+    let value = this.get("energyCapMultiplier");
+    return value.toI32();
+  }
+
+  set energyCapMultiplier(value: i32) {
+    this.set("energyCapMultiplier", Value.fromI32(value));
+  }
+
+  get energyGrowthMultiplier(): i32 {
+    let value = this.get("energyGrowthMultiplier");
+    return value.toI32();
+  }
+
+  set energyGrowthMultiplier(value: i32) {
+    this.set("energyGrowthMultiplier", Value.fromI32(value));
+  }
+
+  get rangeMultiplier(): i32 {
+    let value = this.get("rangeMultiplier");
+    return value.toI32();
+  }
+
+  set rangeMultiplier(value: i32) {
+    this.set("rangeMultiplier", Value.fromI32(value));
+  }
+
+  get speedMultiplier(): i32 {
+    let value = this.get("speedMultiplier");
+    return value.toI32();
+  }
+
+  set speedMultiplier(value: i32) {
+    this.set("speedMultiplier", Value.fromI32(value));
+  }
+
+  get defenseMultiplier(): i32 {
+    let value = this.get("defenseMultiplier");
+    return value.toI32();
+  }
+
+  set defenseMultiplier(value: i32) {
+    this.set("defenseMultiplier", Value.fromI32(value));
   }
 }
