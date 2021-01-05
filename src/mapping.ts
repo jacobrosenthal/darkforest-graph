@@ -16,6 +16,9 @@ import {
 } from "../generated/Contract/Contract";
 import { Arrival, ArrivalQueue, Artifact, Meta, Player, Planet, DepartureQueue, Hat, Upgrade } from "../generated/schema";
 
+// NOTE: every handler must have a planet refresh for the planet(s) touched in
+// order to keep lastupdated in sync with the contract
+
 // NOTE: the timestamps within are all unix epoch in seconds NOT MILLISECONDS
 // like in all the JS code where youll see divided by contractPrecision. As a
 // result be very careful with your copy pastes. And TODO, unify the codebases
@@ -155,6 +158,7 @@ export function handleDepositedArtifact(event: DepositedArtifact): void {
 export function handlePlanetTransferred(event: PlanetTransferred): void {
     let contract = Contract.bind(event.address);
 
+    // mini refresh
     let locationDec = event.params.loc;
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
@@ -189,9 +193,10 @@ export function handleBlock(block: ethereum.Block): void {
     // first call setup and global to hold the last timestap we processed
     let meta = setup(current);
 
-    processArrivals(meta, current, contract);
-
+    // schedule any departures from arrival handler and do the delayed mini refresh
     processDepartures(current, contract);
+
+    processArrivals(meta, current, contract);
 
     meta.lastProcessed = current;
     meta.save();
@@ -202,6 +207,7 @@ export function handleBlock(block: ethereum.Block): void {
 export function handleBoughtHat(event: BoughtHat): void {
     let contract = Contract.bind(event.address);
 
+    // mini refresh
     let locationDec = event.params.loc;
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
     let rawPlanet = contract.planets(locationDec);
@@ -220,6 +226,7 @@ export function handleBoughtHat(event: BoughtHat): void {
 
 // A departure (or ArrivalQueued) event. We add these arrivalIds to a
 // DepartureQueue for later processing in handleBlock
+// We delay minirefresh to the blockhandler
 export function handleArrivalQueued(event: ArrivalQueued): void {
 
     let current = event.block.timestamp;
@@ -317,6 +324,7 @@ function processDepartures(current: i32, contract: Contract): void {
             arrival.departureTime = compactArrival.departureTime.toI32();
             arrival.arrivalTime = arrivalTime;
             arrival.receivedAt = current;
+            arrival.save();
 
             // heres our fromplanet mini refresh
             let fromPlanet = Planet.load(fromPlanetLocationId);
@@ -325,6 +333,7 @@ function processDepartures(current: i32, contract: Contract): void {
             fromPlanet.energyLazy = compactArrival.fromPlanetPopulation.toI32();;
             fromPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
             fromPlanet.lastUpdated = current;
+            fromPlanet.save();
 
             // get a mini refresh
             let toPlanet = toPlanets.get(toPlanetLocationId);
@@ -333,31 +342,20 @@ function processDepartures(current: i32, contract: Contract): void {
             toPlanet.energyLazy = compactArrival.toPlanetPopulation.toI32();
             toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
             toPlanet.lastUpdated = current;
-
-            // if its already arrived?
-            if (arrivalTime <= current) {
-                toPlanet = arrive(toPlanet, arrival);
-                arrival.processedAt = current;
-            }
-            // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
-            else {
-                let pending = ArrivalQueue.load(arrivalTime.toString());
-                let pendingArrivals: String[] = [];
-                if (pending === null) {
-                    pending = new ArrivalQueue(arrivalTime.toString());
-                } else {
-                    pendingArrivals = pending.arrivals;
-                }
-                pendingArrivals.push(arrival.id);
-                pending.arrivals = pendingArrivals;
-                pending.save();
-            }
-
-            fromPlanet.save();
-            arrival.save();
             toPlanet.save();
-        }
 
+            // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
+            let pending = ArrivalQueue.load(arrivalTime.toString());
+            let pendingArrivals: String[] = [];
+            if (pending === null) {
+                pending = new ArrivalQueue(arrivalTime.toString());
+            } else {
+                pendingArrivals = pending.arrivals;
+            }
+            pendingArrivals.push(arrival.id);
+            pending.arrivals = pendingArrivals;
+            pending.save();
+        }
     }
 }
 
