@@ -369,13 +369,13 @@ export class Planet extends Entity {
     this.set("hasTriedFindingArtifact", Value.fromBoolean(value));
   }
 
-  get heldArtifactId(): i32 {
+  get heldArtifactId(): BigInt {
     let value = this.get("heldArtifactId");
-    return value.toI32();
+    return value.toBigInt();
   }
 
-  set heldArtifactId(value: i32) {
-    this.set("heldArtifactId", Value.fromI32(value));
+  set heldArtifactId(value: BigInt) {
+    this.set("heldArtifactId", Value.fromBigInt(value));
   }
 
   get artifactLockedTimestamp(): i32 {

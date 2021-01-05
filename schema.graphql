@@ -41,7 +41,7 @@ type Planet @entity {
     "Computed silver cost of applied upgrades"
     silverSpentComputed: Int!
     hasTriedFindingArtifact: Boolean!
-    heldArtifactId: Int!
+    heldArtifactId: BigInt!
     artifactLockedTimestamp: Int!
 }
 

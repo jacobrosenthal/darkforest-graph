@@ -508,7 +508,7 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
-    planet.heldArtifactId = planetExtendedInfo.value10.toI32();
+    planet.heldArtifactId = planetExtendedInfo.value10;
     planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
 
     //localstuff
@@ -548,7 +548,7 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
-    planet.heldArtifactId = planetExtendedInfo.value10.toI32();
+    planet.heldArtifactId = planetExtendedInfo.value10;
     planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
 
     return planet;
