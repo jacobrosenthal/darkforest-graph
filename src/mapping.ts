@@ -7,6 +7,8 @@ import {
     BoughtHat,
     Contract__planetsExtendedInfoResult,
     Contract__planetsResult,
+    Contract__bulkGetPlanetsByIdsResultRetStruct,
+    Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct,
     FoundArtifact,
     DepositedArtifact,
     WithdrewArtifact,
@@ -264,7 +266,34 @@ function processDepartures(current: i32, contract: Contract): void {
 
         let arrivalIds = departures.arrivalIds;
 
-        let compactArrivals = contract.bulkGetCompactArrivalsByIds(departures.arrivalIds);
+        // very costly to call getArrival in a loop, so do them all up front
+        let compactArrivals = contract.bulkGetCompactArrivalsByIds(arrivalIds);
+
+        // very costly to call getPlanet in a loop, so do them all up front
+        var toPlanets = new Map<string, Planet | null>();
+        let nullPlanets: BigInt[] = [];
+
+        // find the planets we know about and add them to the map
+        for (let i = 0; i < arrivalIds.length; i++) {
+
+            let toPlanetDec = compactArrivals[i].toPlanet;
+            let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
+            let toPlanet = Planet.load(toPlanetLocationId);
+            if (toPlanet === null) {
+                nullPlanets.push(toPlanetDec);
+            }
+            toPlanets.set(toPlanetLocationId, toPlanet);
+        }
+
+        // new up the ones we dont know about and add them to the map
+        let rawPlanets = contract.bulkGetPlanetsByIds(nullPlanets);
+        let rawPlanetExtendeds = contract.bulkGetPlanetsExtendedInfoByIds(nullPlanets);
+
+        for (let i = 0; i < rawPlanets.length; i++) {
+            let locationDec = nullPlanets[i];
+            let toPlanet = newPlanetFromBulk(locationDec, rawPlanets[i], rawPlanetExtendeds[i]);
+            toPlanets.set(toPlanet.id, toPlanet);
+        }
 
         for (let i = 0; i < arrivalIds.length; i++) {
 
@@ -298,22 +327,14 @@ function processDepartures(current: i32, contract: Contract): void {
             fromPlanet.lastUpdated = current;
             fromPlanet.save();
 
-            let toPlanet = Planet.load(toPlanetLocationId);
-            // had to make a new planet which refreshed it
-            if (toPlanet === null) {
-                // todo this is the most costly path as its called in a loop.
-                // also happens constantly in the game..
-                // ideally detect and use contract.bulkGetPlanetsByIds
-                toPlanet = newPlanet(toPlanetDec, contract)
-            } else {
+            // get a mini refresh
+            let toPlanet = toPlanets.get(toPlanetLocationId);
+            // addresses gets 0x prefixed and 0 padded in toHexString
+            toPlanet.owner = compactArrival.toPlanetOwner.toHexString();
+            toPlanet.energyLazy = compactArrival.toPlanetPopulation.toI32();
+            toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
+            toPlanet.lastUpdated = current;
 
-                // or get a mini refresh
-                // addresses gets 0x prefixed and 0 padded in toHexString
-                toPlanet.owner = compactArrival.toPlanetOwner.toHexString();
-                toPlanet.energyLazy = compactArrival.toPlanetPopulation.toI32();
-                toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
-                toPlanet.lastUpdated = current;
-            }
             toPlanet.save();
 
             let arrivalTime = arrival.arrivalTime;
@@ -541,6 +562,57 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
         // 0x prefixed?
         planet.heldArtifact = planetExtendedInfo.value10.toHexString();
         planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
+    } else {
+        planet.heldArtifact = null;
+        planet.artifactLockedTimestamp = null;
+    }
+
+    //localstuff
+    planet.silverSpentComputed = 0;
+    planet.locationDec = locationDec;
+    planet.isEnergyCapBoosted = isEnergyCapBoosted(locationId);
+    planet.isEnergyGrowthBoosted = isEnergyGrowthBoosted(locationId);
+    planet.isRangeBoosted = isRangeBoosted(locationId);
+    planet.isSpeedBoosted = isSpeedBoosted(locationId);
+    planet.isDefenseBoosted = isDefenseBoosted(locationId);
+    return planet;
+}
+
+function newPlanetFromBulk(locationDec: BigInt, rawPlanet: Contract__bulkGetPlanetsByIdsResultRetStruct, planetExtendedInfo: Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct): Planet | null {
+
+    let locationId = locationDecToLocationId(locationDec);
+
+    let planet = new Planet(locationId);
+    // addresses gets 0x prefixed and 0 padded in toHexString
+    planet.owner = rawPlanet.owner.toHexString();
+    planet.isInitialized = planetExtendedInfo.isInitialized;
+    planet.createdAt = planetExtendedInfo.createdAt.toI32();
+    planet.lastUpdated = planetExtendedInfo.lastUpdated.toI32();
+    planet.perlin = planetExtendedInfo.perlin.toI32();
+    planet.range = rawPlanet.range.toI32();
+    planet.speed = rawPlanet.speed.toI32();
+    planet.defense = rawPlanet.defense.toI32();
+    planet.energyLazy = rawPlanet.population.toI32();
+    planet.energyCap = rawPlanet.populationCap.toI32();
+    planet.energyGrowth = rawPlanet.populationGrowth.toI32();
+    planet.silverCap = rawPlanet.silverCap.toI32();
+    planet.silverGrowth = rawPlanet.silverGrowth.toI32();
+    planet.silverLazy = rawPlanet.silver.toI32();
+    planet.planetLevel = rawPlanet.planetLevel.toI32();
+    planet.rangeUpgrades = planetExtendedInfo.upgradeState0.toI32();
+    planet.speedUpgrades = planetExtendedInfo.upgradeState1.toI32();
+    planet.defenseUpgrades = planetExtendedInfo.upgradeState2.toI32();
+
+    planet.hatLevel = planetExtendedInfo.hatLevel.toI32();
+    // what?
+    planet.planetResource = toPlanetResource(BigInt.fromI32(rawPlanet.planetResource).toString());
+    planet.spaceType = toSpaceType(BigInt.fromI32(planetExtendedInfo.spaceType).toString());
+
+    planet.hasTriedFindingArtifact = planetExtendedInfo.hasTriedFindingArtifact;
+    if (planetExtendedInfo.heldArtifactId !== BigInt.fromI32(0)) {
+        // 0x prefixed?
+        planet.heldArtifact = planetExtendedInfo.heldArtifactId.toHexString();
+        planet.artifactLockedTimestamp = planetExtendedInfo.artifactLockedTimestamp.toI32();
     } else {
         planet.heldArtifact = null;
         planet.artifactLockedTimestamp = null;
