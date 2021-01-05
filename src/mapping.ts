@@ -299,6 +299,7 @@ function processDepartures(current: i32, contract: Contract): void {
 
             let compactArrival = compactArrivals[i];
             let arrivalId = arrivalIds[i];
+            let arrivalTime = compactArrival.arrivalTime.toI32();
 
             let toPlanetDec = compactArrival.toPlanet
             let fromPlanetDec = compactArrival.fromPlanet
@@ -314,9 +315,8 @@ function processDepartures(current: i32, contract: Contract): void {
             arrival.energyArriving = compactArrival.popArriving.toI32();
             arrival.silverMoved = compactArrival.silverMoved.toI32();
             arrival.departureTime = compactArrival.departureTime.toI32();
-            arrival.arrivalTime = compactArrival.arrivalTime.toI32();
+            arrival.arrivalTime = arrivalTime;
             arrival.receivedAt = current;
-            // careful, we havent saved them to the store yet
 
             // heres our fromplanet mini refresh
             let fromPlanet = Planet.load(fromPlanetLocationId);
@@ -325,7 +325,6 @@ function processDepartures(current: i32, contract: Contract): void {
             fromPlanet.energyLazy = compactArrival.fromPlanetPopulation.toI32();;
             fromPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
             fromPlanet.lastUpdated = current;
-            fromPlanet.save();
 
             // get a mini refresh
             let toPlanet = toPlanets.get(toPlanetLocationId);
@@ -335,11 +334,9 @@ function processDepartures(current: i32, contract: Contract): void {
             toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
             toPlanet.lastUpdated = current;
 
-            toPlanet.save();
-
-            let arrivalTime = arrival.arrivalTime;
-            // contract applied arrival for us?
+            // if its already arrived?
             if (arrivalTime <= current) {
+                toPlanet = arrive(toPlanet, arrival);
                 arrival.processedAt = current;
             }
             // put the arrival in an array keyed by its arrivalTime to be later processed by handleBlock
@@ -356,7 +353,9 @@ function processDepartures(current: i32, contract: Contract): void {
                 pending.save();
             }
 
+            fromPlanet.save();
             arrival.save();
+            toPlanet.save();
         }
 
     }
