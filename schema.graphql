@@ -24,17 +24,17 @@ type Planet @entity {
     "Value divided by 100 for percentage. Less than 100 is negative"
     defense: Int!
     "NOTE: This needs to be divided by 1000. NOTE: This is stored lazily and needs to be updated from lastUpdated to current time"
-    energyLazy: Int!
+    milliEnergyLazy: Int!
     "NOTE: This needs to be divided by 1000"
-    energyCap: Int!
+    milliEnergyCap: Int!
     "NOTE: This needs to be divided by 1000"
-    energyGrowth: Int!
+    milliEnergyGrowth: Int!
     "NOTE: This needs to be divided by 1000"
-    silverCap: Int!
+    milliSilverCap: Int!
     "NOTE: This needs to be divided by 1000"
-    silverGrowth: Int!
+    milliSilverGrowth: Int!
     "NOTE: This needs to be divided by 1000. NOTE: This is stored lazily and needs to be updated from lastUpdated to current time"
-    silverLazy: Int!
+    milliSilverLazy: Int!
     planetLevel: Int!
     rangeUpgrades: Int!
     speedUpgrades: Int!
@@ -85,9 +85,9 @@ type Arrival @entity {
     fromPlanet: Planet!
     toPlanet: Planet!
     "NOTE: This needs to be divided by 1000"
-    energyArriving: Int!
+    milliEnergyArriving: Int!
     "NOTE: This needs to be divided by 1000"
-    silverMoved: Int!
+    milliSilverMoved: Int!
     departureTime: Int!
     arrivalTime: Int!
     receivedAt: Int!

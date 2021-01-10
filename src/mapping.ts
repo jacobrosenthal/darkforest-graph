@@ -336,8 +336,8 @@ function processDepartures(current: i32, contract: Contract): void {
             arrival.player = compactArrival.fromPlanetOwner.toHexString();
             arrival.fromPlanet = fromPlanetLocationId;
             arrival.toPlanet = toPlanetLocationId;
-            arrival.energyArriving = compactArrival.popArriving.toI32();
-            arrival.silverMoved = compactArrival.silverMoved.toI32();
+            arrival.milliEnergyArriving = compactArrival.popArriving.toI32();
+            arrival.milliSilverMoved = compactArrival.silverMoved.toI32();
             arrival.departureTime = compactArrival.departureTime.toI32();
             arrival.arrivalTime = arrivalTime;
             arrival.receivedAt = current;
@@ -347,8 +347,8 @@ function processDepartures(current: i32, contract: Contract): void {
             let fromPlanet = Planet.load(fromPlanetLocationId);
             // addresses gets 0x prefixed and 0 padded in toHexString
             fromPlanet.owner = compactArrival.fromPlanetOwner.toHexString();
-            fromPlanet.energyLazy = compactArrival.fromPlanetPopulation.toI32();;
-            fromPlanet.silverLazy = compactArrival.fromPlanetSilver.toI32();
+            fromPlanet.milliEnergyLazy = compactArrival.fromPlanetPopulation.toI32();;
+            fromPlanet.milliSilverLazy = compactArrival.fromPlanetSilver.toI32();
             fromPlanet.lastUpdated = current;
             fromPlanet.save();
 
@@ -356,8 +356,8 @@ function processDepartures(current: i32, contract: Contract): void {
             let toPlanet = toPlanets.get(toPlanetLocationId);
             // addresses gets 0x prefixed and 0 padded in toHexString
             toPlanet.owner = compactArrival.toPlanetOwner.toHexString();
-            toPlanet.energyLazy = compactArrival.toPlanetPopulation.toI32();
-            toPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
+            toPlanet.milliEnergyLazy = compactArrival.toPlanetPopulation.toI32();
+            toPlanet.milliSilverLazy = compactArrival.toPlanetSilver.toI32();
             toPlanet.lastUpdated = current;
             toPlanet.save();
 
@@ -420,7 +420,7 @@ function calculateSilverSpent(planet: Planet | null): i32 {
         totalUpgradeCostPercent += upgradeCosts[i];
     }
 
-    let silverSpent: f64 = (totalUpgradeCostPercent / 100.0) * f64(planet.silverCap);
+    let silverSpent: f64 = (totalUpgradeCostPercent / 100.0) * f64(planet.milliSilverCap);
 
     return i32(silverSpent);
 }
@@ -436,71 +436,71 @@ function getSilverOverTime(
 ): i32 {
 
     if (endTimeS <= startTimeS) {
-        return planet.silverLazy;
+        return planet.milliSilverLazy;
     }
 
     if (!hasOwner(planet)) {
-        return planet.silverLazy;
+        return planet.milliSilverLazy;
     }
 
-    if (planet.silverLazy > planet.silverCap) {
-        return planet.silverCap;
+    if (planet.milliSilverLazy > planet.milliSilverCap) {
+        return planet.milliSilverCap;
     }
 
-    let silver = f64(planet.silverLazy);
-    let silverCap = f64(planet.silverCap); // 60000000 current max
-    let silverGrowth = f64(planet.silverGrowth); // 3333 current max
+    let milliSilver = f64(planet.milliSilverLazy);
+    let milliSilverCap = f64(planet.milliSilverCap); // 60000000000 current max
+    let milliSilverGrowth = f64(planet.milliSilverGrowth); // 3333000 current max
     let timeElapsed = f64(endTimeS - startTimeS); // this can be arbitrarily large if months passed~2 weeks is 902725
 
     // timeElapsed * silverGrowth + silver <= i32.MAX_VALUE
     // assert(timeElapsed <= (i32.MAX_VALUE - silver) / silverGrowth);
-    if (timeElapsed > (f64(i32.MAX_VALUE) - silver) / silverGrowth) {
-        timeElapsed = (f64(i32.MAX_VALUE) - silver) / silverGrowth;
+    if (timeElapsed > (f64(i32.MAX_VALUE) - milliSilver) / milliSilverGrowth) {
+        timeElapsed = (f64(i32.MAX_VALUE) - milliSilver) / milliSilverGrowth;
     }
 
-    return i32(Math.min(timeElapsed * silverGrowth + silver, silverCap));
+    return i32(Math.min(timeElapsed * milliSilverGrowth + milliSilver, milliSilverCap));
 }
 
 function getEnergyAtTime(planet: Planet | null, atTimeS: i32): i32 {
 
     if (atTimeS <= planet.lastUpdated) {
-        return planet.energyLazy;
+        return planet.milliEnergyLazy;
     }
 
     if (!hasOwner(planet)) {
-        return planet.energyLazy;
+        return planet.milliEnergyLazy;
     }
 
-    if (planet.energyLazy === 0) {
+    if (planet.milliEnergyLazy === 0) {
         return 0;
     }
 
-    let energy = f64(planet.energyLazy);
-    let energyCap = f64(planet.energyCap); // 65000000 current max
-    let energyGrowth = f64(planet.energyGrowth); // 3000 current max
+    let milliEnergy = f64(planet.milliEnergyLazy);
+    let milliEnergyCap = f64(planet.milliEnergyCap); // 65000000 current max
+    let milliEnergyGrowth = f64(planet.milliEnergyGrowth); // 3000 current max
     let timeElapsed = f64(atTimeS - planet.lastUpdated); // this can be arbitrarily large if months passed ~2 weeks is 902725
 
     // (-4 * energyGrowth * timeElapsed) / energyCap >= f64.MIN_VALUE
     // assert(timeElapsed <= (f64.MIN_VALUE * energyCap) * -4 * energyGrowth)
-    if (timeElapsed > (f64.MIN_VALUE * energyCap) * -4.0 * energyGrowth) {
-        timeElapsed = (f64.MIN_VALUE * energyCap) * -4.0 * energyGrowth;
+    if (timeElapsed > (f64.MIN_VALUE * milliEnergyCap) * -4.0 * milliEnergyGrowth) {
+        timeElapsed = (f64.MIN_VALUE * milliEnergyCap) * -4.0 * milliEnergyGrowth;
     }
 
     // Math.exp between 0 and 1 as long as inside stays negative, so could be as big as energyCap+1
-    let denominator: f64 = Math.exp((-4.0 * energyGrowth * timeElapsed) / energyCap) *
-        (energyCap / energy - 1.0) + 1.0;
+    let denominator: f64 = Math.exp((-4.0 * milliEnergyGrowth * timeElapsed) / milliEnergyCap) *
+        (milliEnergyCap / milliEnergy - 1.0) + 1.0;
 
     //could be as big as energyCap
-    return i32(energyCap / denominator);
+    return i32(milliEnergyCap / denominator);
 }
 
 function updatePlanetToTime(planet: Planet | null, atTimeS: i32): Planet | null {
-    planet.silverLazy = getSilverOverTime(
+    planet.milliSilverLazy = getSilverOverTime(
         planet,
         planet.lastUpdated,
         atTimeS
     );
-    planet.energyLazy = getEnergyAtTime(planet, atTimeS);
+    planet.milliEnergyLazy = getEnergyAtTime(planet, atTimeS);
     planet.lastUpdated = atTimeS;
     return planet;
 }
@@ -511,30 +511,30 @@ function arrive(toPlanet: Planet | null, arrival: Arrival | null): Planet | null
     toPlanet = updatePlanetToTime(toPlanet, arrival.arrivalTime);
 
     // apply energy
-    let shipsMoved = arrival.energyArriving;
+    let shipsMoved = arrival.milliEnergyArriving;
 
     if (arrival.player !== toPlanet.owner) {
         // attacking enemy - includes emptyAddress
 
         let abc = i32(Math.trunc(f64(shipsMoved) * 100.0) / f64(toPlanet.defense))
-        if (toPlanet.energyLazy > abc) {
+        if (toPlanet.milliEnergyLazy > abc) {
             // attack reduces target planet's garrison but doesn't conquer it
-            toPlanet.energyLazy -= abc;
+            toPlanet.milliEnergyLazy -= abc;
         } else {
             // conquers planet
             toPlanet.owner = arrival.player;
-            toPlanet.energyLazy = shipsMoved - i32(Math.trunc((f64(toPlanet.energyLazy) * f64(toPlanet.defense)) / 100.0));
+            toPlanet.milliEnergyLazy = shipsMoved - i32(Math.trunc((f64(toPlanet.milliEnergyLazy) * f64(toPlanet.defense)) / 100.0));
         }
     } else {
         // moving between my own planets
-        toPlanet.energyLazy += shipsMoved;
+        toPlanet.milliEnergyLazy += shipsMoved;
     }
 
     // apply silver
-    if (toPlanet.silverLazy + arrival.silverMoved > toPlanet.silverCap) {
-        toPlanet.silverLazy = toPlanet.silverCap;
+    if (toPlanet.milliSilverLazy + arrival.milliSilverMoved > toPlanet.milliSilverCap) {
+        toPlanet.milliSilverLazy = toPlanet.milliSilverCap;
     } else {
-        toPlanet.silverLazy += arrival.silverMoved;
+        toPlanet.milliSilverLazy += arrival.milliSilverMoved;
     }
 
     return toPlanet;
@@ -557,12 +557,12 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.range = rawPlanet.value1.toI32();
     planet.speed = rawPlanet.value2.toI32();
     planet.defense = rawPlanet.value3.toI32();
-    planet.energyLazy = rawPlanet.value4.toI32();
-    planet.energyCap = rawPlanet.value5.toI32();
-    planet.energyGrowth = rawPlanet.value6.toI32();
-    planet.silverCap = rawPlanet.value8.toI32();
-    planet.silverGrowth = rawPlanet.value9.toI32();
-    planet.silverLazy = rawPlanet.value10.toI32();
+    planet.milliEnergyLazy = rawPlanet.value4.toI32();
+    planet.milliEnergyCap = rawPlanet.value5.toI32();
+    planet.milliEnergyGrowth = rawPlanet.value6.toI32();
+    planet.milliSilverCap = rawPlanet.value8.toI32();
+    planet.milliSilverGrowth = rawPlanet.value9.toI32();
+    planet.milliSilverLazy = rawPlanet.value10.toI32();
     planet.planetLevel = rawPlanet.value11.toI32();
     planet.rangeUpgrades = planetExtendedInfo.value5.toI32();
     planet.speedUpgrades = planetExtendedInfo.value6.toI32();
@@ -607,12 +607,12 @@ function newPlanetFromBulk(locationDec: BigInt, rawPlanet: Contract__bulkGetPlan
     planet.range = rawPlanet.range.toI32();
     planet.speed = rawPlanet.speed.toI32();
     planet.defense = rawPlanet.defense.toI32();
-    planet.energyLazy = rawPlanet.population.toI32();
-    planet.energyCap = rawPlanet.populationCap.toI32();
-    planet.energyGrowth = rawPlanet.populationGrowth.toI32();
-    planet.silverCap = rawPlanet.silverCap.toI32();
-    planet.silverGrowth = rawPlanet.silverGrowth.toI32();
-    planet.silverLazy = rawPlanet.silver.toI32();
+    planet.milliEnergyLazy = rawPlanet.population.toI32();
+    planet.milliEnergyCap = rawPlanet.populationCap.toI32();
+    planet.milliEnergyGrowth = rawPlanet.populationGrowth.toI32();
+    planet.milliSilverCap = rawPlanet.silverCap.toI32();
+    planet.milliSilverGrowth = rawPlanet.silverGrowth.toI32();
+    planet.milliSilverLazy = rawPlanet.silver.toI32();
     planet.planetLevel = rawPlanet.planetLevel.toI32();
     planet.rangeUpgrades = planetExtendedInfo.upgradeState0.toI32();
     planet.speedUpgrades = planetExtendedInfo.upgradeState1.toI32();
@@ -655,12 +655,12 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.range = rawPlanet.value1.toI32();
     planet.speed = rawPlanet.value2.toI32();
     planet.defense = rawPlanet.value3.toI32();
-    planet.energyLazy = rawPlanet.value4.toI32();
-    planet.energyCap = rawPlanet.value5.toI32();
-    planet.energyGrowth = rawPlanet.value6.toI32();
-    planet.silverCap = rawPlanet.value8.toI32();
-    planet.silverGrowth = rawPlanet.value9.toI32();
-    planet.silverLazy = rawPlanet.value10.toI32();
+    planet.milliEnergyLazy = rawPlanet.value4.toI32();
+    planet.milliEnergyCap = rawPlanet.value5.toI32();
+    planet.milliEnergyGrowth = rawPlanet.value6.toI32();
+    planet.milliSilverCap = rawPlanet.value8.toI32();
+    planet.milliSilverGrowth = rawPlanet.value9.toI32();
+    planet.milliSilverLazy = rawPlanet.value10.toI32();
     planet.planetLevel = rawPlanet.value11.toI32();
     planet.rangeUpgrades = planetExtendedInfo.value5.toI32();
     planet.speedUpgrades = planetExtendedInfo.value6.toI32();
