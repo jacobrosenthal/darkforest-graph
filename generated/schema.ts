@@ -324,6 +324,15 @@ export class Planet extends Entity {
     this.set("isDefenseBoosted", Value.fromBoolean(value));
   }
 
+  get isPlanetMineable(): boolean {
+    let value = this.get("isPlanetMineable");
+    return value.toBoolean();
+  }
+
+  set isPlanetMineable(value: boolean) {
+    this.set("isPlanetMineable", Value.fromBoolean(value));
+  }
+
   get hatLevel(): i32 {
     let value = this.get("hatLevel");
     return value.toI32();

@@ -572,6 +572,7 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.isRangeBoosted = isRangeBoosted(locationId);
     planet.isSpeedBoosted = isSpeedBoosted(locationId);
     planet.isDefenseBoosted = isDefenseBoosted(locationId);
+    planet.isPlanetMineable = isPlanetMineable(planet);
     return planet;
 }
 
@@ -623,6 +624,7 @@ function newPlanetFromBulk(locationDec: BigInt, rawPlanet: Contract__bulkGetPlan
     planet.isRangeBoosted = isRangeBoosted(locationId);
     planet.isSpeedBoosted = isSpeedBoosted(locationId);
     planet.isDefenseBoosted = isDefenseBoosted(locationId);
+    planet.isPlanetMineable = isPlanetMineable(planet);
     return planet;
 }
 
@@ -704,6 +706,15 @@ function isSpeedBoosted(locationId: String): boolean {
 // byte 13: defense bonus if byte is < 16
 function isDefenseBoosted(locationId: String): boolean {
     return locationId.charAt(26) === "0";
+}
+
+// byte 14: defense bonus if byte is < 16
+function isPlanetMineable(planet: Planet | null): boolean {
+    return (
+        planet.id.charAt(28) === "0" &&
+        planet.planetLevel >= 1 &&
+        planet.planetResource !== "SILVER"
+    );
 }
 
 function locationDecToLocationId(locationDec: BigInt): String {

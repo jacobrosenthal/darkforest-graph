@@ -41,6 +41,7 @@ type Planet @entity {
     isRangeBoosted: Boolean!
     isSpeedBoosted: Boolean!
     isDefenseBoosted: Boolean!
+    isPlanetMineable: Boolean!
     hatLevel: Int!
     planetResource: PlanetResource!
     spaceType: SpaceType!
