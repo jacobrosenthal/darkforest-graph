@@ -8,17 +8,20 @@ type Player @entity {
 }
 
 type Planet @entity {
-    "0 padded hex version of locationDec, no 0x prefix"
+    "locationId: 0 padded hex value of locationDec, no 0x prefix"
     id: ID!
-    "locationDec version of locationid"
+    "decimal version of locationid"
     locationDec: BigInt!
     owner: Player!
     isInitialized: Boolean!
     createdAt: Int!
     lastUpdated: Int!
     perlin: Int!
+    "Value divided by 100 for percentage. Less than 100 is negative"
     range: Int!
+    "Value divided by 100 for percentage. Less than 100 is negative"
     speed: Int!
+    "Value divided by 100 for percentage. Less than 100 is negative"
     defense: Int!
     "NOTE: This needs to be divided by 1000. NOTE: This is stored lazily and needs to be updated from lastUpdated to current time"
     energyLazy: Int!
@@ -52,18 +55,21 @@ type Planet @entity {
     artifactLockedTimestamp: Int!
 }
 
+"Internal type queuing arrivalqueue events to be processed by the blockhandler"
 type DepartureQueue @entity  {
     "current blocktime of ArrivalQueue event. events are triggered before blockhandler so will be detected and processed by upcoming blockhandler of same blocktime"
     id: ID!
     arrivalIds: [BigInt!]!
 }
 
+"Scheduled arrivals by arrival blocktime"
 type ArrivalQueue @entity  {
     "decimal arrivalTime as a string"
     id: ID!
     arrivals: [Arrival!]!
 }
 
+"Internal type to store internal variables"
 type Meta @entity  {
     id: ID!
     "the last block timestamp the block handler processed arrivals for"
@@ -78,7 +84,9 @@ type Arrival @entity {
     player: Player!
     fromPlanet: Planet!
     toPlanet: Planet!
+    "NOTE: This needs to be divided by 1000"
     energyArriving: Int!
+    "NOTE: This needs to be divided by 1000"
     silverMoved: Int!
     departureTime: Int!
     arrivalTime: Int!
@@ -128,10 +136,15 @@ type Artifact @entity {
     mintedAtTimestamp: Int!
     discoverer: Player!
     artifactType: ArtifactType!
+    "Modifier applied to natural planet variable. Less than 100 is negative"
     energyCapMultiplier: Int!,
+    "Modifier applied to natural planet variable. Less than 100 is negative"
     energyGrowthMultiplier: Int!,
+    "Modifier applied to natural planet variable. Less than 100 is negative"
     rangeMultiplier: Int!,
+    "Modifier applied to natural planet variable. Less than 100 is negative"
     speedMultiplier: Int!,
+    "Modifier applied to natural planet variable. Less than 100 is negative"
     defenseMultiplier: Int!
 }
 
