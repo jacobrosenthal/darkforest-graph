@@ -33,18 +33,18 @@ import { Arrival, ArrivalQueue, Artifact, Meta, Player, Planet, DepartureQueue, 
 // event handlers. Thus it is required to handle all of them and do a full or
 // local refresh to maintain state.
 
-function toSpaceType(spaceType: string): string {
-    if (spaceType == "0") {
+function toSpaceType(spaceType: i32): string {
+    if (spaceType == 0) {
         return "NEBULA";
-    } else if (spaceType == "1") {
+    } else if (spaceType == 1) {
         return "SPACE";
     } else {
         return "DEEP_SPACE";
     }
 }
 
-function toPlanetResource(planetResource: string): string {
-    if (planetResource == "0") {
+function toPlanetResource(planetResource: i32): string {
+    if (planetResource == 0) {
         return "NONE";
     } else {
         return "SILVER";
@@ -568,8 +568,8 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.speedUpgrades = planetExtendedInfo.value6.toI32();
     planet.defenseUpgrades = planetExtendedInfo.value7.toI32();
     planet.hatLevel = planetExtendedInfo.value8.toI32();
-    planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
-    planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+    planet.planetResource = toPlanetResource(rawPlanet.value7);
+    planet.spaceType = toSpaceType(planetExtendedInfo.value4);
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
     if (planetExtendedInfo.value10 !== BigInt.fromI32(0)) {
@@ -619,9 +619,8 @@ function newPlanetFromBulk(locationDec: BigInt, rawPlanet: Contract__bulkGetPlan
     planet.defenseUpgrades = planetExtendedInfo.upgradeState2.toI32();
 
     planet.hatLevel = planetExtendedInfo.hatLevel.toI32();
-    // what?
-    planet.planetResource = toPlanetResource(BigInt.fromI32(rawPlanet.planetResource).toString());
-    planet.spaceType = toSpaceType(BigInt.fromI32(planetExtendedInfo.spaceType).toString());
+    planet.planetResource = toPlanetResource(rawPlanet.planetResource);
+    planet.spaceType = toSpaceType(planetExtendedInfo.spaceType);
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.hasTriedFindingArtifact;
     if (planetExtendedInfo.heldArtifactId !== BigInt.fromI32(0)) {
@@ -667,8 +666,8 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.speedUpgrades = planetExtendedInfo.value6.toI32();
     planet.defenseUpgrades = planetExtendedInfo.value7.toI32();
     planet.hatLevel = planetExtendedInfo.value8.toI32();
-    planet.planetResource = toPlanetResource(rawPlanet.value7.toString());
-    planet.spaceType = toSpaceType(planetExtendedInfo.value4.toString());
+    planet.planetResource = toPlanetResource(rawPlanet.value7);
+    planet.spaceType = toSpaceType(planetExtendedInfo.value4);
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
     if (planetExtendedInfo.value10 !== BigInt.fromI32(0)) {
