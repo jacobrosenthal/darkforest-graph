@@ -331,7 +331,7 @@ function processDepartures(current: i32, contract: Contract): void {
             // addresses gets 0x prefixed and 0 padded in toHexString
             fromPlanet.owner = compactArrival.fromPlanetOwner.toHexString();
             fromPlanet.energyLazy = compactArrival.fromPlanetPopulation.toI32();;
-            fromPlanet.silverLazy = compactArrival.toPlanetSilver.toI32();
+            fromPlanet.silverLazy = compactArrival.fromPlanetSilver.toI32();
             fromPlanet.lastUpdated = current;
             fromPlanet.save();
 
