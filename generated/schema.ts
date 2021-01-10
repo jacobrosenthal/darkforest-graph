@@ -189,58 +189,58 @@ export class Planet extends Entity {
     this.set("defense", Value.fromI32(value));
   }
 
-  get energyLazy(): i32 {
-    let value = this.get("energyLazy");
+  get milliEnergyLazy(): i32 {
+    let value = this.get("milliEnergyLazy");
     return value.toI32();
   }
 
-  set energyLazy(value: i32) {
-    this.set("energyLazy", Value.fromI32(value));
+  set milliEnergyLazy(value: i32) {
+    this.set("milliEnergyLazy", Value.fromI32(value));
   }
 
-  get energyCap(): i32 {
-    let value = this.get("energyCap");
+  get milliEnergyCap(): i32 {
+    let value = this.get("milliEnergyCap");
     return value.toI32();
   }
 
-  set energyCap(value: i32) {
-    this.set("energyCap", Value.fromI32(value));
+  set milliEnergyCap(value: i32) {
+    this.set("milliEnergyCap", Value.fromI32(value));
   }
 
-  get energyGrowth(): i32 {
-    let value = this.get("energyGrowth");
+  get milliEnergyGrowth(): i32 {
+    let value = this.get("milliEnergyGrowth");
     return value.toI32();
   }
 
-  set energyGrowth(value: i32) {
-    this.set("energyGrowth", Value.fromI32(value));
+  set milliEnergyGrowth(value: i32) {
+    this.set("milliEnergyGrowth", Value.fromI32(value));
   }
 
-  get silverCap(): i32 {
-    let value = this.get("silverCap");
+  get milliSilverCap(): i32 {
+    let value = this.get("milliSilverCap");
     return value.toI32();
   }
 
-  set silverCap(value: i32) {
-    this.set("silverCap", Value.fromI32(value));
+  set milliSilverCap(value: i32) {
+    this.set("milliSilverCap", Value.fromI32(value));
   }
 
-  get silverGrowth(): i32 {
-    let value = this.get("silverGrowth");
+  get milliSilverGrowth(): i32 {
+    let value = this.get("milliSilverGrowth");
     return value.toI32();
   }
 
-  set silverGrowth(value: i32) {
-    this.set("silverGrowth", Value.fromI32(value));
+  set milliSilverGrowth(value: i32) {
+    this.set("milliSilverGrowth", Value.fromI32(value));
   }
 
-  get silverLazy(): i32 {
-    let value = this.get("silverLazy");
+  get milliSilverLazy(): i32 {
+    let value = this.get("milliSilverLazy");
     return value.toI32();
   }
 
-  set silverLazy(value: i32) {
-    this.set("silverLazy", Value.fromI32(value));
+  set milliSilverLazy(value: i32) {
+    this.set("milliSilverLazy", Value.fromI32(value));
   }
 
   get planetLevel(): i32 {
@@ -360,13 +360,13 @@ export class Planet extends Entity {
     this.set("spaceType", Value.fromString(value));
   }
 
-  get silverSpentComputed(): i32 {
-    let value = this.get("silverSpentComputed");
+  get milliSilverSpent(): i32 {
+    let value = this.get("milliSilverSpent");
     return value.toI32();
   }
 
-  set silverSpentComputed(value: i32) {
-    this.set("silverSpentComputed", Value.fromI32(value));
+  set milliSilverSpent(value: i32) {
+    this.set("milliSilverSpent", Value.fromI32(value));
   }
 
   get hasTriedFindingArtifact(): boolean {
@@ -591,22 +591,22 @@ export class Arrival extends Entity {
     this.set("toPlanet", Value.fromString(value));
   }
 
-  get energyArriving(): i32 {
-    let value = this.get("energyArriving");
+  get milliEnergyArriving(): i32 {
+    let value = this.get("milliEnergyArriving");
     return value.toI32();
   }
 
-  set energyArriving(value: i32) {
-    this.set("energyArriving", Value.fromI32(value));
+  set milliEnergyArriving(value: i32) {
+    this.set("milliEnergyArriving", Value.fromI32(value));
   }
 
-  get silverMoved(): i32 {
-    let value = this.get("silverMoved");
+  get milliSilverMoved(): i32 {
+    let value = this.get("milliSilverMoved");
     return value.toI32();
   }
 
-  set silverMoved(value: i32) {
-    this.set("silverMoved", Value.fromI32(value));
+  set milliSilverMoved(value: i32) {
+    this.set("milliSilverMoved", Value.fromI32(value));
   }
 
   get departureTime(): i32 {
