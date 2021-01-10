@@ -20,11 +20,17 @@ type Planet @entity {
     range: Int!
     speed: Int!
     defense: Int!
+    "NOTE: This needs to be divided by 1000. NOTE: This is stored lazily and needs to be updated from lastUpdated to current time"
     energyLazy: Int!
+    "NOTE: This needs to be divided by 1000"
     energyCap: Int!
+    "NOTE: This needs to be divided by 1000"
     energyGrowth: Int!
+    "NOTE: This needs to be divided by 1000"
     silverCap: Int!
+    "NOTE: This needs to be divided by 1000"
     silverGrowth: Int!
+    "NOTE: This needs to be divided by 1000. NOTE: This is stored lazily and needs to be updated from lastUpdated to current time"
     silverLazy: Int!
     planetLevel: Int!
     rangeUpgrades: Int!
@@ -115,6 +121,7 @@ type Artifact @entity {
     "same as id, but sortable because its an int"
     artifactId: BigInt!
     planetDiscoveredOn: Planet!
+    "This is also its rarity"
     planetLevel: Int!
     planetBiome: Biome!
     mintedAtTimestamp: Int!
