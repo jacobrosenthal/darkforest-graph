@@ -828,6 +828,15 @@ export class Artifact extends Entity {
     this.set("planetLevel", Value.fromI32(value));
   }
 
+  get rarity(): string {
+    let value = this.get("rarity");
+    return value.toString();
+  }
+
+  set rarity(value: string) {
+    this.set("rarity", Value.fromString(value));
+  }
+
   get planetBiome(): string {
     let value = this.get("planetBiome");
     return value.toString();

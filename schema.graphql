@@ -122,8 +122,8 @@ type Artifact @entity {
     "same as id, but sortable because its an int"
     artifactId: BigInt!
     planetDiscoveredOn: Planet!
-    "This is also its rarity"
     planetLevel: Int!
+    rarity: ArtifactRarity!
     planetBiome: Biome!
     mintedAtTimestamp: Int!
     discoverer: Player!
@@ -154,4 +154,13 @@ enum Biome {
     ICE,
     WASTELAND,
     LAVA,
+}
+
+enum ArtifactRarity {
+    UNKNOWN,
+    COMMON,
+    RARE,
+    EPIC,
+    LEGENDARY,
+    MYTHIC,
 }

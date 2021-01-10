@@ -65,6 +65,22 @@ function toArtifactType(artifactType: i32): string {
     }
 }
 
+function toArtifactRarity(planetLevel: i32): string {
+    if (planetLevel <= 1) {
+        return "COMMON";
+    } else if (planetLevel <= 3) {
+        return "RARE";
+    } else if (planetLevel <= 5) {
+        return "EPIC";
+    } else if (planetLevel <= 7) {
+        return "LEGENDARY";
+    } else if (planetLevel <= 9) {
+        return "MYTHIC";
+    } else {
+        return "UNKNOWN";
+    }
+}
+
 function toBiome(biome: i32): string {
     if (biome == 1) {
         return "OCEAN";
@@ -101,6 +117,7 @@ export function handleFoundArtifact(event: FoundArtifact): void {
     artifact.artifactId = event.params.artifactId;
     artifact.planetDiscoveredOn = locationId;
     artifact.planetLevel = rawArtifact.artifact.planetLevel.toI32();
+    artifact.rarity = toArtifactRarity(artifact.planetLevel);
     artifact.planetBiome = toBiome(rawArtifact.artifact.planetBiome);
     artifact.mintedAtTimestamp = rawArtifact.artifact.mintedAtTimestamp.toI32();
     // addresses gets 0x prefixed and 0 padded in toHexString
