@@ -14,7 +14,9 @@ type Planet @entity {
     locationDec: BigInt!
     owner: Player!
     isInitialized: Boolean!
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     createdAt: Int!
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     lastUpdated: Int!
     perlin: Int!
     "Value divided by 100 for percentage. Less than 100 is negative"
@@ -57,14 +59,14 @@ type Planet @entity {
 
 "Internal type queuing arrivalqueue events to be processed by the blockhandler"
 type DepartureQueue @entity  {
-    "current blocktime of ArrivalQueue event. events are triggered before blockhandler so will be detected and processed by upcoming blockhandler of same blocktime"
+    "blocktime in secondsArrivalQueue event was received in. Events are triggered before blockhandler so will be detected and processed by upcoming blockhandler of same blocktime"
     id: ID!
     arrivalIds: [BigInt!]!
 }
 
 "Scheduled arrivals by arrival blocktime"
 type ArrivalQueue @entity  {
-    "decimal arrivalTime as a string"
+    "decimal arrivalTime in seconds as a string"
     id: ID!
     arrivals: [Arrival!]!
 }
@@ -72,7 +74,7 @@ type ArrivalQueue @entity  {
 "Internal type to store internal variables"
 type Meta @entity  {
     id: ID!
-    "the last block timestamp the block handler processed arrivals for"
+    "the last block timestamp in seconds that was processed"
     lastProcessed: Int!
 }
 
@@ -88,9 +90,13 @@ type Arrival @entity {
     milliEnergyArriving: Int!
     "NOTE: This needs to be divided by 1000"
     milliSilverMoved: Int!
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     departureTime: Int!
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     arrivalTime: Int!
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     receivedAt: Int!
+    "Seconds since epoch. Internal accounting of when block timestamp blockhandler processed this arrival"
     processedAt: Int
 }
 
@@ -101,6 +107,7 @@ type Hat @entity {
     planet: Planet!
     player: Player!
     hatLevel: Int
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     timestamp: Int
 }
 
@@ -110,6 +117,7 @@ type Upgrade @entity {
     "same as id, but linked to planets entity"
     planet: Planet!
     player: Player!
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     timestamp: Int
 }
 
@@ -133,6 +141,7 @@ type Artifact @entity {
     planetLevel: Int!
     rarity: ArtifactRarity!
     planetBiome: Biome!
+    "Seconds since epoch, needs to be multiplied by 1000 for javascript representation"
     mintedAtTimestamp: Int!
     discoverer: Player!
     artifactType: ArtifactType!
