@@ -159,10 +159,10 @@ type Artifact @entity {
 
 enum ArtifactType {
     UNKNOWN
-    OBELISK
+    MONOLITH
     COLOSSUS
-    SHIPWRECK
-    FOSSIL
+    SPACESHIP
+    PYRAMID
 }
 
 enum Biome {

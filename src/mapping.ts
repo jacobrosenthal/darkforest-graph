@@ -53,13 +53,13 @@ function toPlanetResource(planetResource: i32): string {
 
 function toArtifactType(artifactType: i32): string {
     if (artifactType == 1) {
-        return "OBELISK";
+        return "MONOLITH";
     } else if (artifactType == 2) {
         return "COLOSSUS";
     } else if (artifactType == 3) {
-        return "SHIPWRECK";
+        return "SPACESHIP";
     } else if (artifactType == 4) {
-        return "FOSSIL";
+        return "PYRAMID";
     } else {
         return "UNKNOWN";
     }
