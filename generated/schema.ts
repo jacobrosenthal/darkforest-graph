@@ -801,15 +801,6 @@ export class Artifact extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get artifactId(): BigInt {
-    let value = this.get("artifactId");
-    return value.toBigInt();
-  }
-
-  set artifactId(value: BigInt) {
-    this.set("artifactId", Value.fromBigInt(value));
-  }
-
   get planetDiscoveredOn(): string {
     let value = this.get("planetDiscoveredOn");
     return value.toString();

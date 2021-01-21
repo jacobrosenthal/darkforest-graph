@@ -133,10 +133,8 @@ enum SpaceType {
 }
 
 type Artifact @entity {
-    "decimal artifactid as a string"
+    "0 padded hex, no 0x prefix, recommend sorting using mintedAtTimestamp"
     id: ID!
-    "same as id, but sortable because its an int"
-    artifactId: BigInt!
     planetDiscoveredOn: Planet!
     planetLevel: Int!
     rarity: ArtifactRarity!

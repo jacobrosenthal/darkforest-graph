@@ -109,12 +109,12 @@ export function handleFoundArtifact(event: FoundArtifact): void {
     let contract = Contract.bind(event.address);
 
     let locationDec = event.params.loc;
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
 
     let rawArtifact = contract.getArtifactById(event.params.artifactId);
-    // this has a 0x prefixed now..is that ok?
-    let artifact = new Artifact(event.params.artifactId.toHexString());
-    artifact.artifactId = event.params.artifactId;
+
+    let artifactId = hexStringToPaddedUnprefixed(event.params.artifactId.toHexString());
+    let artifact = new Artifact(artifactId);
     artifact.planetDiscoveredOn = locationId;
     artifact.planetLevel = rawArtifact.artifact.planetLevel.toI32();
     artifact.rarity = toArtifactRarity(artifact.planetLevel);
@@ -149,7 +149,7 @@ export function handleWithdrewArtifact(event: WithdrewArtifact): void {
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
 
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
@@ -163,7 +163,7 @@ export function handleDepositedArtifact(event: DepositedArtifact): void {
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
 
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
@@ -180,7 +180,7 @@ export function handlePlanetTransferred(event: PlanetTransferred): void {
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
 
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
@@ -193,7 +193,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
     // addresses gets 0x prefixed and 0 padded in toHexString
     let player = new Player(event.params.player.toHexString());
     player.initTimestamp = event.block.timestamp.toI32();
-    player.homeWorld = locationDecToLocationId(locationDec);
+    player.homeWorld = hexStringToPaddedUnprefixed(locationDec.toHexString());
     player.save();
 
     let planet = newPlanet(locationDec, contract);
@@ -228,7 +228,7 @@ export function handleBoughtHat(event: BoughtHat): void {
     let locationDec = event.params.loc;
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
     let rawPlanet = contract.planets(locationDec);
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     planet.save();
@@ -267,7 +267,7 @@ export function handlePlanetUpgraded(event: PlanetUpgraded): void {
     let locationDec = event.params.loc;
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
     let rawPlanet = contract.planets(locationDec);
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
     // recalculate silver spent as thats our field to track
@@ -301,7 +301,7 @@ function processDepartures(current: i32, contract: Contract): void {
         for (let i = 0; i < arrivalIds.length; i++) {
 
             let toPlanetDec = compactArrivals[i].toPlanet;
-            let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
+            let toPlanetLocationId = hexStringToPaddedUnprefixed(toPlanetDec.toHexString());
             let toPlanet = Planet.load(toPlanetLocationId);
             if (toPlanet === null) {
                 nullPlanets.push(toPlanetDec);
@@ -327,8 +327,8 @@ function processDepartures(current: i32, contract: Contract): void {
 
             let toPlanetDec = compactArrival.toPlanet
             let fromPlanetDec = compactArrival.fromPlanet
-            let toPlanetLocationId = locationDecToLocationId(toPlanetDec);
-            let fromPlanetLocationId = locationDecToLocationId(fromPlanetDec);
+            let toPlanetLocationId = hexStringToPaddedUnprefixed(toPlanetDec.toHexString());
+            let fromPlanetLocationId = hexStringToPaddedUnprefixed(fromPlanetDec.toHexString());
 
             let arrival = new Arrival(arrivalId.toString());
             arrival.arrivalId = arrivalId.toI32();
@@ -544,7 +544,7 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
 
     let rawPlanet = contract.planets(locationDec);
     let planetExtendedInfo = contract.planetsExtendedInfo(locationDec);
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
 
     let planet = new Planet(locationId);
 
@@ -573,8 +573,7 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
     if (planetExtendedInfo.value10 !== BigInt.fromI32(0)) {
-        // 0x prefixed?
-        planet.heldArtifact = planetExtendedInfo.value10.toHexString();
+        planet.heldArtifact = hexStringToPaddedUnprefixed(planetExtendedInfo.value10.toHexString());
         planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
     } else {
         planet.heldArtifact = null;
@@ -595,7 +594,7 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
 
 function newPlanetFromBulk(locationDec: BigInt, rawPlanet: Contract__bulkGetPlanetsByIdsResultRetStruct, planetExtendedInfo: Contract__bulkGetPlanetsExtendedInfoByIdsResultRetStruct): Planet | null {
 
-    let locationId = locationDecToLocationId(locationDec);
+    let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
 
     let planet = new Planet(locationId);
     // addresses gets 0x prefixed and 0 padded in toHexString
@@ -733,12 +732,11 @@ function isPlanetMineable(planet: Planet | null): boolean {
     );
 }
 
-function locationDecToLocationId(locationDec: BigInt): String {
-    // BigInt does not get 0 padded by toHexString plus gets a 0x prefix...
-    let prefixedLocationId = locationDec.toHexString();
+// BigInt does not get 0 padded by toHexString plus gets a 0x prefix...
+function hexStringToPaddedUnprefixed(prefixed: String): String {
     // strip 0x
-    let planetid = prefixedLocationId.substring(2, prefixedLocationId.length);
+    let stripped = prefixed.substring(2, prefixed.length);
     // pad to 64
-    let locationId = planetid.padStart(64, "0")
-    return locationId;
+    let padded = stripped.padStart(64, "0")
+    return padded;
 }
