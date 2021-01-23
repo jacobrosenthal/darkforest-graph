@@ -5,6 +5,8 @@ type Player @entity {
     "allows null because 0x0000000000000000000000000000000000000000 has no homeWorld"
     homeWorld: Planet
     planets: [Planet!]! @derivedFrom(field: "owner")
+    "NOTE: Does not reflect current ownership"
+    artifactsDiscovered: [Artifact!]! @derivedFrom(field: "discoverer")
 }
 
 type Planet @entity {

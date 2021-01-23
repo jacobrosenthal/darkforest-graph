@@ -76,6 +76,15 @@ export class Player extends Entity {
   set planets(value: Array<string>) {
     this.set("planets", Value.fromStringArray(value));
   }
+
+  get artifactsDiscovered(): Array<string> {
+    let value = this.get("artifactsDiscovered");
+    return value.toStringArray();
+  }
+
+  set artifactsDiscovered(value: Array<string>) {
+    this.set("artifactsDiscovered", Value.fromStringArray(value));
+  }
 }
 
 export class Planet extends Entity {
