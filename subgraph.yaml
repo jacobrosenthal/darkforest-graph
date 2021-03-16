@@ -46,5 +46,24 @@ dataSources:
                 handler: handlePlayerInitialized
           blockHandlers:
               - handler: handleBlock
-
           file: ./src/mapping.ts
+    - kind: ethereum/contract
+      name: Tokens
+      network: xdai
+      source:
+          address: "0x5cFbC3e179C48ccB3B3d35bAD6361972F2C5603B"
+          abi: Tokens
+          startBlock: 13700380
+      mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.4
+          language: wasm/assemblyscript
+          entities:
+              - Artifact
+          abis:
+              - name: Tokens
+                file: ./abis/Tokens.json
+          eventHandlers:
+              - event: Transfer(indexed address,indexed address,indexed uint256)
+                handler: handleTransfer
+          file: ./src/mappingTokens.ts

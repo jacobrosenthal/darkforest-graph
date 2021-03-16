@@ -115,7 +115,9 @@ export function handleFoundArtifact(event: FoundArtifact): void {
 
     let artifactId = hexStringToPaddedUnprefixed(event.params.artifactId.toHexString());
     let artifact = new Artifact(artifactId);
+    artifact.owner = event.address.toHexString();
     artifact.planetDiscoveredOn = locationId;
+    artifact.planetLocation = locationId;
     artifact.planetLevel = rawArtifact.artifact.planetLevel.toI32();
     artifact.rarity = toArtifactRarity(artifact.planetLevel);
     artifact.planetBiome = toBiome(rawArtifact.artifact.planetBiome);
@@ -138,6 +140,7 @@ export function handleFoundArtifact(event: FoundArtifact): void {
 
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
+    planet.hasArtifact = true;
     planet.save();
 }
 
@@ -152,7 +155,13 @@ export function handleWithdrewArtifact(event: WithdrewArtifact): void {
     let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
+    planet.hasArtifact = false;
     planet.save();
+
+    let artifactId = hexStringToPaddedUnprefixed(event.params.artifactId.toHexString());
+    let artifact = Artifact.load(artifactId);
+    artifact.planetLocation = null;
+    artifact.save();
 }
 
 export function handleDepositedArtifact(event: DepositedArtifact): void {
@@ -166,7 +175,14 @@ export function handleDepositedArtifact(event: DepositedArtifact): void {
     let locationId = hexStringToPaddedUnprefixed(locationDec.toHexString());
     let planet = Planet.load(locationId);
     planet = refreshPlanetFromContract(planet, rawPlanet, planetExtendedInfo);
+    planet.hasArtifact=true;
     planet.save();
+
+    let artifactId = hexStringToPaddedUnprefixed(event.params.artifactId.toHexString());
+    let artifact = Artifact.load(artifactId);
+    artifact.planetLocation = locationId;
+    artifact.save();
+
 }
 
 
@@ -347,7 +363,7 @@ function processDepartures(current: i32, contract: Contract): void {
             let fromPlanet = Planet.load(fromPlanetLocationId);
             // addresses gets 0x prefixed and 0 padded in toHexString
             fromPlanet.owner = compactArrival.fromPlanetOwner.toHexString();
-            fromPlanet.milliEnergyLazy = compactArrival.fromPlanetPopulation.toI32();;
+            fromPlanet.milliEnergyLazy = compactArrival.fromPlanetPopulation.toI32();
             fromPlanet.milliSilverLazy = compactArrival.fromPlanetSilver.toI32();
             fromPlanet.lastUpdated = current;
             fromPlanet.save();
@@ -570,17 +586,15 @@ function newPlanet(locationDec: BigInt, contract: Contract): Planet | null {
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.planetResource = toPlanetResource(rawPlanet.value7);
     planet.spaceType = toSpaceType(planetExtendedInfo.value4);
-
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
     if (planetExtendedInfo.value10 !== BigInt.fromI32(0)) {
-        planet.heldArtifact = hexStringToPaddedUnprefixed(planetExtendedInfo.value10.toHexString());
         planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
     } else {
-        planet.heldArtifact = null;
         planet.artifactLockedTimestamp = null;
     }
 
     //localstuff
+    planet.hasArtifact = false;
     planet.milliSilverSpent = 0;
     planet.locationDec = locationDec;
     planet.isEnergyCapBoosted = isEnergyCapBoosted(locationId);
@@ -623,15 +637,13 @@ function newPlanetFromBulk(locationDec: BigInt, rawPlanet: Contract__bulkGetPlan
 
     planet.hasTriedFindingArtifact = planetExtendedInfo.hasTriedFindingArtifact;
     if (planetExtendedInfo.heldArtifactId !== BigInt.fromI32(0)) {
-        // 0x prefixed?
-        planet.heldArtifact = planetExtendedInfo.heldArtifactId.toHexString();
         planet.artifactLockedTimestamp = planetExtendedInfo.artifactLockedTimestamp.toI32();
     } else {
-        planet.heldArtifact = null;
         planet.artifactLockedTimestamp = null;
     }
 
     //localstuff
+    planet.hasArtifact = false;
     planet.milliSilverSpent = 0;
     planet.locationDec = locationDec;
     planet.isEnergyCapBoosted = isEnergyCapBoosted(locationId);
@@ -667,14 +679,10 @@ function refreshPlanetFromContract(planet: Planet | null, rawPlanet: Contract__p
     planet.hatLevel = planetExtendedInfo.value8.toI32();
     planet.planetResource = toPlanetResource(rawPlanet.value7);
     planet.spaceType = toSpaceType(planetExtendedInfo.value4);
-
     planet.hasTriedFindingArtifact = planetExtendedInfo.value9;
     if (planetExtendedInfo.value10 !== BigInt.fromI32(0)) {
-        // 0x prefixed?
-        planet.heldArtifact = planetExtendedInfo.value10.toHexString();
         planet.artifactLockedTimestamp = planetExtendedInfo.value11.toI32();
     } else {
-        planet.heldArtifact = null;
         planet.artifactLockedTimestamp = null;
     }
 

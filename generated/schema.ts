@@ -85,6 +85,15 @@ export class Player extends Entity {
   set artifactsDiscovered(value: Array<string>) {
     this.set("artifactsDiscovered", Value.fromStringArray(value));
   }
+
+  get artifactsWithdrawn(): Array<string> {
+    let value = this.get("artifactsWithdrawn");
+    return value.toStringArray();
+  }
+
+  set artifactsWithdrawn(value: Array<string>) {
+    this.set("artifactsWithdrawn", Value.fromStringArray(value));
+  }
 }
 
 export class Planet extends Entity {
@@ -387,20 +396,29 @@ export class Planet extends Entity {
     this.set("hasTriedFindingArtifact", Value.fromBoolean(value));
   }
 
-  get heldArtifact(): string | null {
-    let value = this.get("heldArtifact");
+  get hasArtifact(): boolean {
+    let value = this.get("hasArtifact");
+    return value.toBoolean();
+  }
+
+  set hasArtifact(value: boolean) {
+    this.set("hasArtifact", Value.fromBoolean(value));
+  }
+
+  get artifacts(): Array<string> | null {
+    let value = this.get("artifacts");
     if (value === null || value.kind == ValueKind.NULL) {
       return null;
     } else {
-      return value.toString();
+      return value.toStringArray();
     }
   }
 
-  set heldArtifact(value: string | null) {
+  set artifacts(value: Array<string> | null) {
     if (value === null) {
-      this.unset("heldArtifact");
+      this.unset("artifacts");
     } else {
-      this.set("heldArtifact", Value.fromString(value as string));
+      this.set("artifacts", Value.fromStringArray(value as Array<string>));
     }
   }
 
@@ -808,6 +826,32 @@ export class Artifact extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get owner(): string {
+    let value = this.get("owner");
+    return value.toString();
+  }
+
+  set owner(value: string) {
+    this.set("owner", Value.fromString(value));
+  }
+
+  get planetLocation(): string | null {
+    let value = this.get("planetLocation");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set planetLocation(value: string | null) {
+    if (value === null) {
+      this.unset("planetLocation");
+    } else {
+      this.set("planetLocation", Value.fromString(value as string));
+    }
   }
 
   get planetDiscoveredOn(): string {

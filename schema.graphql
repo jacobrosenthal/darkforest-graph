@@ -7,6 +7,8 @@ type Player @entity {
     planets: [Planet!]! @derivedFrom(field: "owner")
     "NOTE: Does not reflect current ownership"
     artifactsDiscovered: [Artifact!]! @derivedFrom(field: "discoverer")
+    "NOTE: Does not reflect deposited artifacts now 'owned' by the game contract"
+    artifactsWithdrawn: [Artifact!]! @derivedFrom(field: "owner")
 }
 
 type Planet @entity {
@@ -55,7 +57,8 @@ type Planet @entity {
     "Computed silver cost of applied upgrades. NOTE: needs to be divided by 1000"
     milliSilverSpent: Int!
     hasTriedFindingArtifact: Boolean!
-    heldArtifact: Artifact
+    hasArtifact: Boolean!
+    artifacts: [Artifact!] @derivedFrom(field: "planetLocation")
     artifactLockedTimestamp: Int!
 }
 
@@ -137,6 +140,8 @@ enum SpaceType {
 type Artifact @entity {
     "0 padded hex, no 0x prefix, recommend sorting using mintedAtTimestamp"
     id: ID!
+    owner: Player!
+    planetLocation: Planet
     planetDiscoveredOn: Planet!
     planetLevel: Int!
     rarity: ArtifactRarity!
