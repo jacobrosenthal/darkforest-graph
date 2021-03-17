@@ -9,6 +9,8 @@ type Player @entity {
     artifactsDiscovered: [Artifact!]! @derivedFrom(field: "discoverer")
     "NOTE: Does not reflect deposited artifacts now 'owned' by the game contract"
     artifactsWithdrawn: [Artifact!]! @derivedFrom(field: "owner")
+    hasHat: Boolean!
+    hats: [Hat!]! @derivedFrom(field: "player")
 }
 
 type Planet @entity {

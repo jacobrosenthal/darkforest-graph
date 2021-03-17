@@ -208,6 +208,7 @@ export function handlePlayerInitialized(event: PlayerInitialized): void {
 
     // addresses gets 0x prefixed and 0 padded in toHexString
     let player = new Player(event.params.player.toHexString());
+    player.hasHat = false;
     player.initTimestamp = event.block.timestamp.toI32();
     player.homeWorld = hexStringToPaddedUnprefixed(locationDec.toHexString());
     player.save();
@@ -255,6 +256,10 @@ export function handleBoughtHat(event: BoughtHat): void {
     hat.hatLevel = planet.hatLevel;
     hat.timestamp = planet.lastUpdated;
     hat.save();
+
+    let player = Player.load(planet.owner);
+    player.hasHat = true;
+    player.save();
 }
 
 // A departure (or ArrivalQueued) event. We add these arrivalIds to a
@@ -699,6 +704,7 @@ function setup(timestamp: i32): Meta | null {
 
         // careful, player addresses need to be 0x prefixed and 0 padded
         let player = new Player("0x0000000000000000000000000000000000000000");
+        player.hasHat = false;
         player.initTimestamp = timestamp;
         player.save();
 

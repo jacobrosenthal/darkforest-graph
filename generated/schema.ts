@@ -94,6 +94,24 @@ export class Player extends Entity {
   set artifactsWithdrawn(value: Array<string>) {
     this.set("artifactsWithdrawn", Value.fromStringArray(value));
   }
+
+  get hasHat(): boolean {
+    let value = this.get("hasHat");
+    return value.toBoolean();
+  }
+
+  set hasHat(value: boolean) {
+    this.set("hasHat", Value.fromBoolean(value));
+  }
+
+  get hats(): Array<string> {
+    let value = this.get("hats");
+    return value.toStringArray();
+  }
+
+  set hats(value: Array<string>) {
+    this.set("hats", Value.fromStringArray(value));
+  }
 }
 
 export class Planet extends Entity {
